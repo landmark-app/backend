@@ -6,7 +6,7 @@ files:
   - source: application.py
     destination: /home/ec2-user/landmark
   - source: /src
-    destination: /home/ec2-user/landmark/src
+    destination: /home/ec2-user/landmark
   - source: /conf
     destination: /home/ec2-user/landmark
 hooks:
