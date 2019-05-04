@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    app.run(
+    application.run(
         debug=args.debug,
         host=args.host,
         port=int(args.port)
