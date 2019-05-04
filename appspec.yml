@@ -1,12 +1,14 @@
 version: 0.0
 os: linux
 files:
-  - source: /app.wsgi
-    destination: /var/www/landmark
-  - source: /
+  - source: requirements.txt
     destination: /home/ec2-user/landmark
-  - source: /conf/sample_app.conf
-    destination: /etc/httpd/conf.d
+  - source: application.py
+    destination: /home/ec2-user/landmark
+  - source: /src
+    destination: /home/ec2-user/landmark/src
+  - source: /conf
+    destination: /home/ec2-user/landmark
 hooks:
   AfterInstall:
     - location: scripts/install_dependencies

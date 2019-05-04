@@ -1,4 +1,5 @@
-from flask import Flask, request, Response
+from flask import Flask, Response
+import argparse
 import json
 
 application = Flask(__name__)
@@ -12,4 +13,26 @@ def health_check():
     )
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0')
+    parser = argparse.ArgumentParser("""
+    Creates a flask.Flask instance and runs it. Parses
+    command-line flags to configure the app.
+    """)
+    msg = 'Hostname of Flask app [{}]'.format(default_host)
+    parser.add_argument("-H", "--host",
+                      help=msg,
+                      default="0.0.0.0")
+    msg = 'Port for Flask app [{}]'.format(default_port)
+    parser.add_argument("-P", "--port",
+                      help=msg,
+                      default="80")
+    parser.add_argument("-d", "--debug",
+                      action="store_true", dest="debug",
+                      help=optparse.SUPPRESS_HELP)
+
+    args = parser.parse_args()
+
+    app.run(
+        debug=args.debug,
+        host=args.host,
+        port=int(args.port)
+    )
