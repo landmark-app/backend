@@ -27,7 +27,7 @@ if __name__ == "__main__":
                       default="80")
     parser.add_argument("-d", "--debug",
                       action="store_true", dest="debug",
-                      help=optparse.SUPPRESS_HELP)
+                      help=argparse.SUPPRESS_HELP)
 
     args = parser.parse_args()
 
