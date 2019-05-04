@@ -2,7 +2,9 @@ version: 0.2
 
 artifacts:
   files:
-    - app.wsgi
     - application.py
     - appspec.yml
+    - requirements.txt
     - scripts/*
+    - src/*
+    - conf/*
