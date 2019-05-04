@@ -17,11 +17,11 @@ if __name__ == "__main__":
     Creates a flask.Flask instance and runs it. Parses
     command-line flags to configure the app.
     """)
-    msg = 'Hostname of Flask app [{}]'.format(default_host)
+    msg = 'Hostname of Flask app [{}]'.format("0.0.0.0")
     parser.add_argument("-H", "--host",
                       help=msg,
                       default="0.0.0.0")
-    msg = 'Port for Flask app [{}]'.format(default_port)
+    msg = 'Port for Flask app [{}]'.format("80")
     parser.add_argument("-P", "--port",
                       help=msg,
                       default="80")
