@@ -3,6 +3,8 @@ from py2neo.ogm import RelatedFrom
 
 
 class LandMark(GraphObject):
+    __primarykey__ = "name"
+
     name = Property()
     description = Property()
 
@@ -26,12 +28,10 @@ class LandMark(GraphObject):
                 setattr(self, key, value)
 
     def __init__(self, **kwargs):
-        print('Inside LandMark constructor')
         self.add_or_update(**kwargs)
 
     def as_dict(self):
         return {
-            'id': self._GraphObject__ogm.node._Entity__remote._id,
             'name': self.name,
             'description': self.description,
             'latitude': self.latitude,
@@ -63,13 +63,6 @@ class LandMark(GraphObject):
             self.images.remove(image)
 
     # Object level interfaces
-    def fetch(self, graph):
-        _id = self._GraphObject__ogm.node._Entity__remote._id
-        return self.select(graph, _id).first()
-
-    def fetch_by_id(self, graph, _id):
-        return self.select(graph, _id).first()
-
     def save(self, graph):
         graph.push(self)
 
