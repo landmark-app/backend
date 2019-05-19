@@ -3,8 +3,8 @@ import json
 from py2neo import Graph
 
 # Internal imports
-from landmark import LandMark
-from person import Person
+from landmarkgo import LandMark
+from persongo import Person
 
 # Environment variables
 """
@@ -66,19 +66,9 @@ class PersonInput(graphene.InputObjectType):
     phone = graphene.String()
 
 
-class Query(graphene.ObjectType):
-    # landmarks = graphene.List(LandMarkSchema, name=graphene.String())
-    landmark = graphene.Field(LandMarkSchema, name=graphene.String())
-    person = graphene.Field(PersonSchema, key=graphene.String())
-
-    def resolve_landmark(self, info, name):
-        landmark = LandMark.match(graph, name).first()
-        # return [LandMarkSchema(**landmarks.as_dict())]
-        return LandMarkSchema(**landmark.as_dict())
-
-    def resolve_person(self, info, key):
-        person = Person.match(graph, key).first()
-        return PersonSchema(**person.as_dict())
+class VisitorInput(graphene.InputObjectType):
+    landmark_name = graphene.String(required=True)
+    visitor_key = graphene.String(required=True)
 
 
 class CreateLandMark(graphene.Mutation):
@@ -128,6 +118,62 @@ class CreatePerson(graphene.Mutation):
         return CreatePerson(person=person, ok=ok)
 
 
+class LinkLandMarkVisitor(graphene.Mutation):
+
+    class Arguments:
+        visitor_data = VisitorInput(required=True)
+
+    landmark = graphene.Field(LandMarkSchema)
+    visitor = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, visitor_data=None):
+        landmark = LandMark.match(graph, visitor_data.landmark_name).first()
+        visitor = Person.match(graph, visitor_data.visitor_key).first()
+
+        if not landmark or not visitor:
+            ok = False
+            return LinkLandMarkVisitor(landmark=None, visitor=None, ok=ok)
+
+        landmark.add_or_update_visitor(visitor)
+        landmark.save(graph)
+
+        visitor.add_or_update_visited_landmark(landmark)
+        visitor.save(graph)
+        ok = True
+
+        return LinkLandMarkVisitor(landmark=landmark, visitor=visitor, ok=ok)
+
+
+class DelinkLandMarkVisitor(graphene.Mutation):
+
+    class Arguments:
+        visitor_data = VisitorInput(required=True)
+
+    landmark = graphene.Field(LandMarkSchema)
+    visitor = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, visitor_data=None):
+        landmark = LandMark.match(graph, visitor_data.landmark_name).first()
+        visitor = Person.match(graph, visitor_data.visitor_key).first()
+
+        if not landmark or not visitor:
+            ok = False
+            return LinkLandMarkVisitor(landmark=None, visitor=None, ok=ok)
+
+        landmark.remove_visitor(visitor)
+        landmark.save(graph)
+
+        visitor.remove_visited_landmark(landmark)
+        visitor.save(graph)
+        ok = True
+
+        return DelinkLandMarkVisitor(landmark=landmark, visitor=visitor, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -162,11 +208,28 @@ class DeletePerson(graphene.Mutation):
         return DeletePerson(person=person, ok=ok)
 
 
+class Query(graphene.ObjectType):
+    # landmarks = graphene.List(LandMarkSchema, name=graphene.String())
+    landmark = graphene.Field(LandMarkSchema, name=graphene.String())
+    person = graphene.Field(PersonSchema, key=graphene.String())
+
+    def resolve_landmark(self, info, name):
+        landmark = LandMark.match(graph, name).first()
+        # return [LandMarkSchema(**landmarks.as_dict())]
+        return LandMarkSchema(**landmark.as_dict())
+
+    def resolve_person(self, info, key):
+        person = Person.match(graph, key).first()
+        return PersonSchema(**person.as_dict())
+
+
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
     delete_landmark = DeleteLandMark.Field()
     create_person = CreatePerson.Field()
     delete_person = DeletePerson.Field()
+    link_landmark_visitor = LinkLandMarkVisitor.Field()
+    delink_landmark_visitor = DelinkLandMarkVisitor.Field()
 
 
 schema = graphene.Schema(query=Query,
@@ -194,6 +257,8 @@ create_landmark = schema.execute(
     }
     '''
 )
+items = dict(create_landmark.data.items())
+print(json.dumps(items, indent=4))
 
 create_person = schema.execute(
     '''
@@ -215,6 +280,46 @@ create_person = schema.execute(
     }
     '''
 )
+items = dict(create_person.data.items())
+print(json.dumps(items, indent=4))
+
+link_landmark_visitor = schema.execute(
+    '''
+    mutation linkLandMarkVisitor {
+        link_landmark_visitor(visitor_data: {landmark_name: "SOL", visitor_key:
+        "111"}){
+            landmark{
+                     name,
+            },
+            visitor{
+                   key,
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(link_landmark_visitor.data.items())
+print(json.dumps(items, indent=4))
+
+delink_landmark_visitor = schema.execute(
+    '''
+    mutation delinkLandMarkVisitor {
+        delink_landmark_visitor(visitor_data: {landmark_name: "SOL",
+        visitor_key: "111"}){
+            landmark{
+                     name,
+            },
+            visitor{
+                   key,
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(delink_landmark_visitor.data.items())
+print(json.dumps(items, indent=4))
 
 query_landmark = schema.execute(
     '''
@@ -232,6 +337,8 @@ query_landmark = schema.execute(
     }
     '''
 )
+items = dict(query_landmark.data.items())
+print(json.dumps(items, indent=4))
 
 query_person = schema.execute(
     '''
@@ -248,7 +355,8 @@ query_person = schema.execute(
     }
     '''
 )
-
+items = dict(query_person.data.items())
+print(json.dumps(items, indent=4))
 
 """
 delete_landmark = schema.execute(
@@ -271,6 +379,8 @@ delete_landmark = schema.execute(
     }
     '''
 )
+items = dict(delete_landmark.data.items())
+print(json.dumps(items, indent=4))
 
 delete_person = schema.execute(
     '''
@@ -291,24 +401,6 @@ delete_person = schema.execute(
     }
     '''
 )
-"""
-
-items = dict(create_landmark.data.items())
-print(json.dumps(items, indent=4))
-
-items = dict(create_person.data.items())
-print(json.dumps(items, indent=4))
-
-items = dict(query_landmark.data.items())
-print(json.dumps(items, indent=4))
-
-items = dict(query_person.data.items())
-print(json.dumps(items, indent=4))
-
-"""
-items = dict(delete_landmark.data.items())
-print(json.dumps(items, indent=4))
-
 items = dict(delete_person.data.items())
 print(json.dumps(items, indent=4))
 """
