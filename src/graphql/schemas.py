@@ -4,6 +4,7 @@ from py2neo import Graph
 
 # Internal imports
 from landmark import LandMark
+from person import Person
 
 # Environment variables
 """
@@ -45,14 +46,39 @@ class LandMarkInput(graphene.InputObjectType):
     continent = graphene.String()
 
 
+class PersonSchema(graphene.ObjectType):
+    key = graphene.String()
+    name = graphene.String()
+    rank = graphene.Int()
+    score = graphene.Float()
+    bio = graphene.String()
+    email = graphene.String()
+    phone = graphene.String()
+
+
+class PersonInput(graphene.InputObjectType):
+    key = graphene.String(required=True)
+    name = graphene.String()
+    rank = graphene.Int()
+    score = graphene.Float()
+    bio = graphene.String()
+    email = graphene.String()
+    phone = graphene.String()
+
+
 class Query(graphene.ObjectType):
     # landmarks = graphene.List(LandMarkSchema, name=graphene.String())
     landmark = graphene.Field(LandMarkSchema, name=graphene.String())
+    person = graphene.Field(PersonSchema, key=graphene.String())
 
     def resolve_landmark(self, info, name):
         landmark = LandMark.match(graph, name).first()
         # return [LandMarkSchema(**landmarks.as_dict())]
         return LandMarkSchema(**landmark.as_dict())
+
+    def resolve_person(self, info, key):
+        person = Person.match(graph, key).first()
+        return PersonSchema(**person.as_dict())
 
 
 class CreateLandMark(graphene.Mutation):
@@ -79,6 +105,29 @@ class CreateLandMark(graphene.Mutation):
         return CreateLandMark(landmark=landmark, ok=ok)
 
 
+class CreatePerson(graphene.Mutation):
+
+    class Arguments:
+        person_data = PersonInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_data=None):
+        person = Person(key=person_data.key,
+                        name=person_data.name,
+                        rank=person_data.rank,
+                        score=person_data.score,
+                        bio=person_data.bio,
+                        email=person_data.email,
+                        phone=person_data.phone)
+        person.save(graph)
+        ok = True
+
+        return CreatePerson(person=person, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -96,16 +145,35 @@ class DeleteLandMark(graphene.Mutation):
         return DeleteLandMark(landmark=landmark, ok=ok)
 
 
+class DeletePerson(graphene.Mutation):
+
+    class Arguments:
+        person_data = PersonInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_data=None):
+        person = Person.match(graph, person_data.key).first()
+        person.delete(graph)
+        ok = True
+
+        return DeletePerson(person=person, ok=ok)
+
+
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
     delete_landmark = DeleteLandMark.Field()
+    create_person = CreatePerson.Field()
+    delete_person = DeletePerson.Field()
 
 
 schema = graphene.Schema(query=Query,
                          mutation=Mutations,
                          auto_camelcase=False)
 
-result_create = schema.execute(
+create_landmark = schema.execute(
     '''
     mutation createLandMark {
         create_landmark(landmark_data: {name: "SOL", description: "SAC",
@@ -127,7 +195,28 @@ result_create = schema.execute(
     '''
 )
 
-result_query = schema.execute(
+create_person = schema.execute(
+    '''
+    mutation createPerson {
+        create_person(person_data: {key: "111", name: "Shreyas", rank: 21,
+        score: 121.90, bio: "test bio", email: "shreyas@gmail.com", phone:
+        "+12222222"}){
+            person{
+                   key,
+                   name,
+                   rank,
+                   score,
+                   bio,
+                   email,
+                   phone
+            },
+            ok
+        }
+    }
+    '''
+)
+
+query_landmark = schema.execute(
     '''
     {
         landmark (name: "SOL"){
@@ -144,8 +233,25 @@ result_query = schema.execute(
     '''
 )
 
+query_person = schema.execute(
+    '''
+    {
+        person (key: "111"){
+            key,
+            name,
+            rank,
+            score,
+            bio,
+            email,
+            phone
+        }
+    }
+    '''
+)
 
-result_delete = schema.execute(
+
+"""
+delete_landmark = schema.execute(
     '''
     mutation deleteLandMark {
         delete_landmark(landmark_data: {name: "SOL"}) {
@@ -166,12 +272,43 @@ result_delete = schema.execute(
     '''
 )
 
+delete_person = schema.execute(
+    '''
+    mutation deletePerson {
+        delete_person(person_data: {key: "111"}) {
+            person{
+                   key,
+                   name,
+                   rank,
+                   score,
+                   bio,
+                   email,
+                   phone
+            },
+            ok
+        }
 
-items = dict(result_create.data.items())
+    }
+    '''
+)
+"""
+
+items = dict(create_landmark.data.items())
 print(json.dumps(items, indent=4))
 
-items = dict(result_query.data.items())
+items = dict(create_person.data.items())
 print(json.dumps(items, indent=4))
 
-items = dict(result_delete.data.items())
+items = dict(query_landmark.data.items())
 print(json.dumps(items, indent=4))
+
+items = dict(query_person.data.items())
+print(json.dumps(items, indent=4))
+
+"""
+items = dict(delete_landmark.data.items())
+print(json.dumps(items, indent=4))
+
+items = dict(delete_person.data.items())
+print(json.dumps(items, indent=4))
+"""

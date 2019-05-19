@@ -103,12 +103,6 @@ class Person(GraphObject):
             self.comments_posted.remove(comment)
 
     # Object level interfaces
-    def fetch(self, graph):
-        return self.select(graph, self.key).first()
-
-    def fetch_by_key(self, graph, key):
-        return self.select(graph, key).first()
-
     def save(self, graph):
         graph.push(self)
 
