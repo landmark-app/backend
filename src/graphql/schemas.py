@@ -7,7 +7,7 @@ from imagego import Image
 from landmarkgo import LandMark
 from persongo import Person
 from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
-    PersonInput, VisitorInput, ImageSchema, ImageInput
+    PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput
 
 # Environment variables
 """
@@ -148,6 +148,64 @@ class DelinkLandMarkVisitor(graphene.Mutation):
         return DelinkLandMarkVisitor(landmark=landmark, visitor=visitor, ok=ok)
 
 
+class LinkLandMarkImage(graphene.Mutation):
+
+    class Arguments:
+        landmark_image_data = LandMarkImageInput(required=True)
+
+    landmark = graphene.Field(LandMarkSchema)
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, landmark_image_data=None):
+        landmark = LandMark.match(graph,
+                                  landmark_image_data.landmark_name).first()
+        image = Image.match(graph, landmark_image_data.image_key).first()
+
+        if not landmark or not image:
+            ok = False
+            return LinkLandMarkImage(landmark=None, image=None, ok=ok)
+
+        landmark.add_or_update_image(image)
+        landmark.save(graph)
+
+        image.add_or_update_landmark(landmark)
+        image.save(graph)
+        ok = True
+
+        return LinkLandMarkImage(landmark=landmark, image=image, ok=ok)
+
+
+class DelinkLandMarkImage(graphene.Mutation):
+
+    class Arguments:
+        landmark_image_data = LandMarkImageInput(required=True)
+
+    landmark = graphene.Field(LandMarkSchema)
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, landmark_image_data=None):
+        landmark = LandMark.match(graph,
+                                  landmark_image_data.landmark_name).first()
+        image = Image.match(graph, landmark_image_data.image_key).first()
+
+        if not landmark or not image:
+            ok = False
+            return LinkLandMarkImage(landmark=None, image=None, ok=ok)
+
+        landmark.remove_image(image)
+        landmark.save(graph)
+
+        image.remove_landmark(landmark)
+        image.save(graph)
+        ok = True
+
+        return DelinkLandMarkImage(landmark=landmark, image=image, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -206,6 +264,7 @@ class Query(graphene.ObjectType):
     image = graphene.Field(ImageSchema, key=graphene.String())
     landmark_visitors = graphene.List(PersonSchema, name=graphene.String())
     person_visits = graphene.List(LandMarkSchema, key=graphene.String())
+    landmark_images = graphene.List(ImageSchema, name=graphene.String())
 
     def resolve_landmark(self, info, name):
         landmark = LandMark.match(graph, name).first()
@@ -230,6 +289,16 @@ class Query(graphene.ObjectType):
         return [LandMarkSchema(**landmark.as_dict())
                 for landmark in person.visited]
 
+    def resolve_landmark_images(self, info, name):
+        landmark = LandMark.match(graph, name).first()
+        return [ImageSchema(**image.as_dict())
+                for image in landmark.images]
+
+    def resolve_image_landmarks(self, info, key):
+        image = Image.match(graph, key).first()
+        return [LandMarkSchema(**landmark.as_dict())
+                for landmark in image.landmarks]
+
 
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
@@ -240,17 +309,64 @@ class Mutations(graphene.ObjectType):
     delete_image = DeleteImage.Field()
     link_landmark_visitor = LinkLandMarkVisitor.Field()
     delink_landmark_visitor = DelinkLandMarkVisitor.Field()
+    link_landmark_image = LinkLandMarkImage.Field()
+    delink_landmark_image = DelinkLandMarkImage.Field()
 
 
 schema = graphene.Schema(query=Query,
                          mutation=Mutations,
                          auto_camelcase=False)
 
+"""
 create_image = schema.execute(
     '''
     mutation createImage {
         create_image(image_data: {key: "aaa111", url: "https://image",
-        description: "Image 1", score: 80.4, private: false, timestamp:
+        description: "SOL1", score: 80.4, private: false, timestamp:
+        "2019-05-20T02:50:31+05:30"}){
+            image{
+                  key,
+                  url,
+                  description,
+                  score,
+                  private,
+                  timestamp
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_image.data.items())
+print(json.dumps(items, indent=4))
+
+create_image = schema.execute(
+    '''
+    mutation createImage {
+        create_image(image_data: {key: "aaa222", url: "https://image",
+        description: "SOL2", score: 80.4, private: false, timestamp:
+        "2019-05-20T06:50:31+05:30"}){
+            image{
+                  key,
+                  url,
+                  description,
+                  score,
+                  private,
+                  timestamp
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_image.data.items())
+print(json.dumps(items, indent=4))
+
+create_image = schema.execute(
+    '''
+    mutation createImage {
+        create_image(image_data: {key: "bbb111", url: "https://image",
+        description: "GSB1", score: 80.4, private: false, timestamp:
         "2019-05-20T02:50:31+05:30"}){
             image{
                   key,
@@ -304,4 +420,110 @@ delete_image = schema.execute(
     '''
 )
 items = dict(delete_image.data.items())
+print(json.dumps(items, indent=4))
+
+link_landmark_image = schema.execute(
+    '''
+    mutation linkLandMarkImage {
+        link_landmark_image(
+            landmark_image_data: {
+                                  landmark_name: "GSB",
+                                  image_key: "bbb111"})
+            {
+             landmark{
+                      name,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_landmark_image.data.items())
+print(json.dumps(items, indent=4))
+
+link_landmark_image = schema.execute(
+    '''
+    mutation linkLandMarkImage {
+        link_landmark_image(
+            landmark_image_data: {
+                                  landmark_name: "SOL",
+                                  image_key: "aaa111"})
+            {
+             landmark{
+                      name,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_landmark_image.data.items())
+print(json.dumps(items, indent=4))
+
+link_landmark_image = schema.execute(
+    '''
+    mutation linkLandMarkImage {
+        link_landmark_image(
+            landmark_image_data: {
+                                  landmark_name: "SOL",
+                                  image_key: "aaa222"})
+            {
+             landmark{
+                      name,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_landmark_image.data.items())
+print(json.dumps(items, indent=4))
+
+delink_landmark_image = schema.execute(
+    '''
+    mutation delinkLandMarkImage {
+        delink_landmark_image(
+            landmark_image_data: {
+                                  landmark_name: "SOL",
+                                  image_key: "aaa222"})
+            {
+             landmark{
+                      name,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(delink_landmark_image.data.items())
+print(json.dumps(items, indent=4))
+"""
+
+query_landmark_images = schema.execute(
+    '''
+    {
+        landmark_images (name: "SOL"){
+            key,
+            url,
+            description,
+            score,
+            private,
+            timestamp
+        }
+    }
+    '''
+)
+items = dict(query_landmark_images.data.items())
 print(json.dumps(items, indent=4))

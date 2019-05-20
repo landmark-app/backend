@@ -147,6 +147,6 @@ class Person(GraphObject):
 
 
 # To avoid cyclic dependency import error
-from landmarkgo import LandMark  # noqa: E402 F401
-from imagego import Image  # noqa: E402 F401
 from commentgo import Comment  # noqa: E402 F401
+from imagego import Image  # noqa: E402 F401
+from landmarkgo import LandMark  # noqa: E402 F401
