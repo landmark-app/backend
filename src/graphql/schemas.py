@@ -237,6 +237,7 @@ class Mutations(graphene.ObjectType):
     create_person = CreatePerson.Field()
     delete_person = DeletePerson.Field()
     create_image = CreateImage.Field()
+    delete_image = DeleteImage.Field()
     link_landmark_visitor = LinkLandMarkVisitor.Field()
     delink_landmark_visitor = DelinkLandMarkVisitor.Field()
 
@@ -282,4 +283,25 @@ query_image = schema.execute(
     '''
 )
 items = dict(query_image.data.items())
+print(json.dumps(items, indent=4))
+
+delete_image = schema.execute(
+    '''
+    mutation deleteImage {
+        delete_image(image_data: {key: "aaa111"}) {
+            image{
+                  key,
+                  url,
+                  description,
+                  score,
+                  private,
+                  timestamp
+            },
+            ok
+        }
+
+    }
+    '''
+)
+items = dict(delete_image.data.items())
 print(json.dumps(items, indent=4))
