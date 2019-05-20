@@ -88,3 +88,9 @@ class VisitorInput(graphene.InputObjectType):
 class LandMarkImageInput(graphene.InputObjectType):
     landmark_name = graphene.String(required=True)
     image_key = graphene.String(required=True)
+
+
+# Friend relationship
+class FriendsInput(graphene.InputObjectType):
+    friend1_key = graphene.String(required=True)
+    friend2_key = graphene.String(required=True)
