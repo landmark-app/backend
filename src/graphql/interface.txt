@@ -572,3 +572,75 @@ query_friends = schema.execute(
 items = dict(query_friends.data.items())
 print(json.dumps(items, indent=4))
 
+link_following = schema.execute(
+    '''
+    mutation linkFollowing {
+        link_following(
+            following_data: {
+                             person_key: "444",
+                             follower_key: "111"})
+            {
+             person{
+                    key,
+             },
+             follower{
+                      key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_following.data.items())
+print(json.dumps(items, indent=4))
+
+"""
+delink_following = schema.execute(
+    '''
+    mutation delinkFollowing {
+        delink_following(
+            following_data: {
+                             person_key: "444",
+                             follower_key: "111"})
+            {
+             person{
+                    key,
+             },
+             follower{
+                      key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(delink_following.data.items())
+print(json.dumps(items, indent=4))
+"""
+
+query_followers = schema.execute(
+    '''
+    {
+        followers (key: "333"){
+            key,
+            name
+        }
+    }
+    '''
+)
+items = dict(query_followers.data.items())
+print(json.dumps(items, indent=4))
+
+query_followings = schema.execute(
+    '''
+    {
+        followings (key: "111"){
+            key,
+            name
+        }
+    }
+    '''
+)
+items = dict(query_followings.data.items())
+print(json.dumps(items, indent=4))
+

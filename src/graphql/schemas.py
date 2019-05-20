@@ -8,7 +8,7 @@ from landmarkgo import LandMark
 from persongo import Person
 from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
-    FriendsInput
+    FriendsInput, FollowingInput
 
 # Environment variables
 """
@@ -266,6 +266,63 @@ class DelinkFriends(graphene.Mutation):
         return DelinkFriends(friend1=friend1, friend2=friend2, ok=ok)
 
 
+# Establish following
+class LinkFollowing(graphene.Mutation):
+
+    class Arguments:
+        following_data = FollowingInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    follower = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, following_data=None):
+        person = Person.match(graph, following_data.person_key).first()
+        follower = Person.match(graph, following_data.follower_key).first()
+
+        if not person or not follower:
+            ok = False
+            return LinkFollowing(person=None, follower=None, ok=ok)
+
+        person.add_or_update_follower(follower)
+        person.save(graph)
+
+        follower.add_or_update_following(person)
+        follower.save(graph)
+        ok = True
+
+        return LinkFollowing(person=person, follower=follower, ok=ok)
+
+
+class DelinkFollowing(graphene.Mutation):
+
+    class Arguments:
+        following_data = FollowingInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    follower = graphene.Field(PersonSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, following_data=None):
+        person = Person.match(graph, following_data.person_key).first()
+        follower = Person.match(graph, following_data.follower_key).first()
+
+        if not person or not follower:
+            ok = False
+            return LinkFollowing(person=None, follower=None, ok=ok)
+
+        person.remove_follower(follower)
+        person.save(graph)
+
+        follower.remove_following(person)
+        follower.save(graph)
+        ok = True
+
+        return DelinkFollowing(person=person, follower=follower, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -338,6 +395,12 @@ class Query(graphene.ObjectType):
     # Query to fetch all friends of a person
     friends = graphene.List(PersonSchema, key=graphene.String())
 
+    # Query to fetch all followers of a person
+    followers = graphene.List(PersonSchema, key=graphene.String())
+
+    # Query to fetch all followers of a person
+    followings = graphene.List(PersonSchema, key=graphene.String())
+
     def resolve_landmark(self, info, name):
         landmark = LandMark.match(graph, name).first()
         # return [LandMarkSchema(**landmarks.as_dict())]
@@ -376,6 +439,16 @@ class Query(graphene.ObjectType):
         return [PersonSchema(**friend.as_dict())
                 for friend in person.friends]
 
+    def resolve_followers(self, info, key):
+        person = Person.match(graph, key).first()
+        return [PersonSchema(**follower.as_dict())
+                for follower in person.followers]
+
+    def resolve_followings(self, info, key):
+        person = Person.match(graph, key).first()
+        return [PersonSchema(**following.as_dict())
+                for following in person.followings]
+
 
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
@@ -396,77 +469,10 @@ class Mutations(graphene.ObjectType):
     link_friends = LinkFriends.Field()
     delink_friends = DelinkFriends.Field()
 
+    link_following = LinkFollowing.Field()
+    delink_following = DelinkFollowing.Field()
+
 
 schema = graphene.Schema(query=Query,
                          mutation=Mutations,
                          auto_camelcase=False)
-
-"""
-link_friends = schema.execute(
-    '''
-    mutation linkFriends {
-        link_friends(
-            friends_data: {
-                           friend1_key: "111",
-                           friend2_key: "222"})
-            {
-             friend1{
-                     key,
-             },
-             friend2{
-                     key,
-             },
-             ok
-        }
-    }
-    '''
-)
-items = dict(link_friends.data.items())
-print(json.dumps(items, indent=4))
-
-delink_friends = schema.execute(
-    '''
-    mutation delinkFriends {
-        delink_friends(
-            friends_data: {
-                           friend1_key: "111",
-                           friend2_key: "222"})
-            {
-             friend1{
-                     key,
-             },
-             friend2{
-                     key,
-             },
-             ok
-        }
-    }
-    '''
-)
-items = dict(delink_friends.data.items())
-print(json.dumps(items, indent=4))
-
-query_image_landmarks = schema.execute(
-    '''
-    {
-        image_landmarks (key: "aaa111"){
-            name,
-        }
-    }
-    '''
-)
-items = dict(query_image_landmarks.data.items())
-print(json.dumps(items, indent=4))
-"""
-
-query_friends = schema.execute(
-    '''
-    {
-        friends (key: "111"){
-            key,
-        }
-    }
-    '''
-)
-items = dict(query_friends.data.items())
-print(json.dumps(items, indent=4))
