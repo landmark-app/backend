@@ -3,10 +3,11 @@ import json
 from py2neo import Graph
 
 # Internal imports
+from imagego import Image
 from landmarkgo import LandMark
 from persongo import Person
 from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
-    PersonInput, VisitorInput
+    PersonInput, VisitorInput, ImageSchema, ImageInput
 
 # Environment variables
 """
@@ -67,6 +68,28 @@ class CreatePerson(graphene.Mutation):
         ok = True
 
         return CreatePerson(person=person, ok=ok)
+
+
+class CreateImage(graphene.Mutation):
+
+    class Arguments:
+        image_data = ImageInput(required=True)
+
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, image_data=None):
+        image = Image(key=image_data.key,
+                      url=image_data.url,
+                      description=image_data.description,
+                      score=image_data.score,
+                      private=image_data.private,
+                      timestamp=image_data.timestamp)
+        image.save(graph)
+        ok = True
+
+        return CreateImage(image=image, ok=ok)
 
 
 class LinkLandMarkVisitor(graphene.Mutation):
@@ -159,10 +182,28 @@ class DeletePerson(graphene.Mutation):
         return DeletePerson(person=person, ok=ok)
 
 
+class DeleteImage(graphene.Mutation):
+
+    class Arguments:
+        image_data = ImageInput(required=True)
+
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, image_data=None):
+        image = Image.match(graph, image_data.key).first()
+        image.delete(graph)
+        ok = True
+
+        return DeleteImage(image=image, ok=ok)
+
+
 class Query(graphene.ObjectType):
     # landmarks = graphene.List(LandMarkSchema, name=graphene.String())
     landmark = graphene.Field(LandMarkSchema, name=graphene.String())
     person = graphene.Field(PersonSchema, key=graphene.String())
+    image = graphene.Field(ImageSchema, key=graphene.String())
     landmark_visitors = graphene.List(PersonSchema, name=graphene.String())
     person_visits = graphene.List(LandMarkSchema, key=graphene.String())
 
@@ -174,6 +215,10 @@ class Query(graphene.ObjectType):
     def resolve_person(self, info, key):
         person = Person.match(graph, key).first()
         return PersonSchema(**person.as_dict())
+
+    def resolve_image(self, info, key):
+        image = Image.match(graph, key).first()
+        return ImageSchema(**image.as_dict())
 
     def resolve_landmark_visitors(self, info, name):
         landmark = LandMark.match(graph, name).first()
@@ -191,6 +236,7 @@ class Mutations(graphene.ObjectType):
     delete_landmark = DeleteLandMark.Field()
     create_person = CreatePerson.Field()
     delete_person = DeletePerson.Field()
+    create_image = CreateImage.Field()
     link_landmark_visitor = LinkLandMarkVisitor.Field()
     delink_landmark_visitor = DelinkLandMarkVisitor.Field()
 
@@ -199,295 +245,41 @@ schema = graphene.Schema(query=Query,
                          mutation=Mutations,
                          auto_camelcase=False)
 
-create_landmark = schema.execute(
+create_image = schema.execute(
     '''
-    mutation createLandMark {
-        create_landmark(landmark_data: {name: "SOL", description: "NY",
-        latitude: -142.0010, longitude: 42.0001, city: "NYC", state: "NY",
-        country: "USA", continent: "NA"}) {
-            landmark{
-                     name,
-                     description,
-                     latitude,
-                     longitude,
-                     city,
-                     state,
-                     country,
-                     continent
+    mutation createImage {
+        create_image(image_data: {key: "aaa111", url: "https://image",
+        description: "Image 1", score: 80.4, private: false, timestamp:
+        "2019-05-20T02:50:31+05:30"}){
+            image{
+                  key,
+                  url,
+                  description,
+                  score,
+                  private,
+                  timestamp
             },
             ok
         }
     }
     '''
 )
-items = dict(create_landmark.data.items())
+items = dict(create_image.data.items())
 print(json.dumps(items, indent=4))
 
-create_landmark = schema.execute(
-    '''
-    mutation createLandMark {
-        create_landmark(landmark_data: {name: "GSB", description: "SFO",
-        latitude: -100.0010, longitude: 60.0001, city: "SFO", state: "CA",
-        country: "USA", continent: "NA"}) {
-            landmark{
-                     name,
-                     description,
-                     latitude,
-                     longitude,
-                     city,
-                     state,
-                     country,
-                     continent
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_landmark.data.items())
-print(json.dumps(items, indent=4))
-
-create_person = schema.execute(
-    '''
-    mutation createPerson {
-        create_person(person_data: {key: "111", name: "Shreyas", rank: 21,
-        score: 121.90, bio: "test bio", email: "shreyas@gmail.com", phone:
-        "+12222222"}){
-            person{
-                   key,
-                   name,
-                   rank,
-                   score,
-                   bio,
-                   email,
-                   phone
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_person.data.items())
-print(json.dumps(items, indent=4))
-
-create_person = schema.execute(
-    '''
-    mutation createPerson {
-        create_person(person_data: {key: "222", name: "Rudy", rank: 11,
-        score: 131.90, bio: "test bio", email: "rudy@gmail.com", phone:
-        "+13333333"}){
-            person{
-                   key,
-                   name,
-                   rank,
-                   score,
-                   bio,
-                   email,
-                   phone
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_person.data.items())
-print(json.dumps(items, indent=4))
-
-link_landmark_visitor = schema.execute(
-    '''
-    mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "SOL", visitor_key:
-        "111"}){
-            landmark{
-                     name,
-            },
-            visitor{
-                   key,
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(link_landmark_visitor.data.items())
-print(json.dumps(items, indent=4))
-
-link_landmark_visitor = schema.execute(
-    '''
-    mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "GSB", visitor_key:
-        "222"}){
-            landmark{
-                     name,
-            },
-            visitor{
-                   key,
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(link_landmark_visitor.data.items())
-print(json.dumps(items, indent=4))
-
-link_landmark_visitor = schema.execute(
-    '''
-    mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "GSB", visitor_key:
-        "111"}){
-            landmark{
-                     name,
-            },
-            visitor{
-                   key,
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(link_landmark_visitor.data.items())
-print(json.dumps(items, indent=4))
-
-"""
-delink_landmark_visitor = schema.execute(
-    '''
-    mutation delinkLandMarkVisitor {
-        delink_landmark_visitor(visitor_data: {landmark_name: "SOL",
-        visitor_key: "111"}){
-            landmark{
-                     name,
-            },
-            visitor{
-                   key,
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(delink_landmark_visitor.data.items())
-print(json.dumps(items, indent=4))
-"""
-
-query_landmark = schema.execute(
+query_image = schema.execute(
     '''
     {
-        landmark (name: "SOL"){
-            name,
-            description,
-            latitude,
-            longitude,
-            city,
-            state,
-            country,
-            continent
-        }
-    }
-    '''
-)
-items = dict(query_landmark.data.items())
-print(json.dumps(items, indent=4))
-
-query_person = schema.execute(
-    '''
-    {
-        person (key: "111"){
+        image (key: "aaa111"){
             key,
-            name,
-            rank,
-            score,
-            bio,
-            email,
-            phone
-        }
-    }
-    '''
-)
-items = dict(query_person.data.items())
-print(json.dumps(items, indent=4))
-
-query_landmark_visitors = schema.execute(
-    '''
-    {
-        landmark_visitors (name: "SOL"){
-            key,
-            name,
-            rank,
-            score,
-            bio,
-            email,
-            phone
-        }
-    }
-    '''
-)
-items = dict(query_landmark_visitors.data.items())
-print(json.dumps(items, indent=4))
-
-query_person_visits = schema.execute(
-    '''
-    {
-        person_visits (key: "111"){
-            name,
+            url,
             description,
-            latitude,
-            longitude,
-            city,
-            state,
-            country,
-            continent
+            score,
+            private,
+            timestamp
         }
     }
     '''
 )
-items = dict(query_person_visits.data.items())
+items = dict(query_image.data.items())
 print(json.dumps(items, indent=4))
-
-"""
-delete_landmark = schema.execute(
-    '''
-    mutation deleteLandMark {
-        delete_landmark(landmark_data: {name: "SOL"}) {
-            landmark{
-                     name,
-                     description,
-                     latitude,
-                     longitude,
-                     city,
-                     state,
-                     country,
-                     continent
-            },
-            ok
-        }
-
-    }
-    '''
-)
-items = dict(delete_landmark.data.items())
-print(json.dumps(items, indent=4))
-
-delete_person = schema.execute(
-    '''
-    mutation deletePerson {
-        delete_person(person_data: {key: "111"}) {
-            person{
-                   key,
-                   name,
-                   rank,
-                   score,
-                   bio,
-                   email,
-                   phone
-            },
-            ok
-        }
-
-    }
-    '''
-)
-items = dict(delete_person.data.items())
-print(json.dumps(items, indent=4))
-"""

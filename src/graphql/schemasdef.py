@@ -1,4 +1,17 @@
+import datetime
 import graphene
+from neotime import DateTime
+
+
+class CustomGrapheneDateTime(graphene.DateTime):
+    @staticmethod
+    def serialize(date):
+        if isinstance(date, DateTime):
+            date = datetime.datetime(date.year, date.month, date.day,
+                                     date.hour, date.minute, int(date.second),
+                                     int(date.second * 1000000 % 1000000),
+                                     tzinfo=date.tzinfo)
+        return graphene.DateTime.serialize(date)
 
 
 class LandMarkSchema(graphene.ObjectType):
@@ -47,6 +60,31 @@ class PersonInput(graphene.InputObjectType):
     phone = graphene.String()
 
 
+class ImageSchema(graphene.ObjectType):
+    key = graphene.String()
+    url = graphene.String()
+    description = graphene.String()
+    score = graphene.Float()
+    private = graphene.Boolean()
+    timestamp = CustomGrapheneDateTime()
+
+
+class ImageInput(graphene.InputObjectType):
+    key = graphene.String(required=True)
+    url = graphene.String()
+    description = graphene.String()
+    score = graphene.Float()
+    private = graphene.Boolean()
+    timestamp = CustomGrapheneDateTime()
+
+
+# LandMark Person relationship
 class VisitorInput(graphene.InputObjectType):
     landmark_name = graphene.String(required=True)
     visitor_key = graphene.String(required=True)
+
+
+# LandMark Image relationship
+class LandMarkImageInput(graphene.InputObjectType):
+    landmark_name = graphene.String(required=True)
+    image_key = graphene.String(required=True)
