@@ -1,11 +1,12 @@
 import graphene
 import json
 from py2neo import Graph
+from decouple import config
 
 # Internal imports
-from landmarkgo import LandMark
-from persongo import Person
-from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
+from .landmarkgo import LandMark
+from .persongo import Person
+from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput
 
 # Environment variables
@@ -14,9 +15,9 @@ url = os.environ['NEO4J_URL']
 username = os.environ['NEO4J_USERNAME']
 password = os.environ['NEO4J_PASSWORD']
 """
-url = "bolt://localhost:11007"
-username = "neo4j"
-password = "landmark"
+url = config("NEO4J_URI")
+username = config("NEO4J_USERNAME")
+password = config("NEO4J_PASSWORD")
 
 # Global variables
 graph = Graph(url, auth=(username, password))
