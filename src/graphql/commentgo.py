@@ -7,11 +7,11 @@ class Comment(GraphObject):
     text = Property()
     timestamp = Property()
 
-    # Set of Comments posted by a Person
-    comments = RelatedFrom("Person", "COMMENT_POSTED")
+    # Comment posted by a Person
+    poster = RelatedFrom("Person", "COMMENT_POSTED")
 
-    # Set of Comments for a particular Image
-    comment_on = RelatedTo("Image")
+    # Comment for a particular Image
+    image = RelatedTo("Image")
 
     def add_or_update(self, **kwargs):
         for key, value in kwargs.items():
@@ -23,7 +23,6 @@ class Comment(GraphObject):
 
     def as_dict(self):
         return {
-            'id': self._GraphObject__ogm.node._Entity__remote._id,
             'text': self.text,
             'timestamp': self.timestamp
         }
@@ -31,32 +30,27 @@ class Comment(GraphObject):
     def update(self, **kwargs):
         self.add_or_update(**kwargs)
 
-    def add_or_update_comments(self, comments):
-        for comment in comments:
-            self.comments.update(comment)
+    # List interfaces
+    def add_or_update_poster(self, poster):
+        self.poster.update(poster)
 
-    def remove_comments(self, comments):
-        for comment in comments:
-            self.comments.remove(comment)
+    def remove_poster(self, poster):
+        self.poster.remove(poster)
 
-    def add_or_update_comment_on(self, comment_on):
-        for comment in comment_on:
-            self.comment_on.update(comment)
+    def add_or_update_image(self, image):
+        self.image.update(image)
 
-    def remove_comment_on(self, comment_on):
-        for comment in comment_on:
-            self.comment_on.remove(comment)
+    def remove_image(self, image):
+        self.image.remove(image)
 
     # Object level interfaces
-    def fetch(self, graph):
-        _id = self._GraphObject__ogm.node._Entity__remote._id
-        return self.select(graph, _id).first()
-
-    def fetch_by_id(self, graph, _id):
-        return self.select(graph, _id).first()
-
     def save(self, graph):
         graph.push(self)
 
     def delete(self, graph):
         graph.delete(self)
+
+
+# To avoid cyclic dependency import error
+from imagego import Image  # noqa: E402 F401
+from persongo import Person  # noqa: E402 F401
