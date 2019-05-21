@@ -10,7 +10,7 @@ from persongo import Person
 from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
     FriendsInput, FollowingInput, PersonImageInput, CommentSchema,\
-    CommentInput
+    CommentInput, PersonCommentInput
 
 # Environment variables
 """
@@ -402,6 +402,63 @@ class DelinkPersonImage(graphene.Mutation):
         return LinkPersonImage(person=person, image=image, ok=ok)
 
 
+# Relationship between person and comment posted
+class LinkPersonComment(graphene.Mutation):
+
+    class Arguments:
+        person_comment_data = PersonCommentInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    comment = graphene.Field(CommentSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_comment_data=None):
+        person = Person.match(graph, person_comment_data.person_key).first()
+        comment = Comment.match(graph, person_comment_data.comment_key).first()
+
+        if not person or not comment:
+            ok = False
+            return LinkPersonComment(person=None, comment=None, ok=ok)
+
+        person.add_or_update_posted_comment(comment)
+        person.save(graph)
+
+        comment.add_or_update_poster(person)
+        comment.save(graph)
+        ok = True
+
+        return LinkPersonComment(person=person, comment=comment, ok=ok)
+
+
+class DelinkPersonComment(graphene.Mutation):
+
+    class Arguments:
+        person_comment_data = PersonCommentInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    comment = graphene.Field(CommentSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_comment_data=None):
+        person = Person.match(graph, person_comment_data.person_key).first()
+        comment = Comment.match(graph, person_comment_data.comment_key).first()
+
+        if not person or not comment:
+            ok = False
+            return LinkPersonComment(person=None, comment=None, ok=ok)
+
+        person.remove_posted_comment(comment)
+        person.save(graph)
+
+        comment.remove_poster(person)
+        comment.save(graph)
+        ok = True
+
+        return DelinkPersonComment(person=person, comment=comment, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -503,6 +560,13 @@ class Query(graphene.ObjectType):
     # Query to fetch poster of a particular image
     image_poster = graphene.List(PersonSchema, key=graphene.String())
 
+    # Query to fetch all comments posted by a person
+    person_posted_comments = graphene.List(CommentSchema,
+                                           key=graphene.String())
+
+    # Query to fetch poster of a particular comment
+    comment_poster = graphene.List(PersonSchema, key=graphene.String())
+
     def resolve_landmark(self, info, key):
         landmark = LandMark.match(graph, key).first()
         return LandMarkSchema(**landmark.as_dict())
@@ -564,6 +628,16 @@ class Query(graphene.ObjectType):
         return [PersonSchema(**person.as_dict())
                 for person in image.poster]
 
+    def resolve_person_posted_comments(self, info, key):
+        person = Person.match(graph, key).first()
+        return [CommentSchema(**comment.as_dict())
+                for comment in person.posted_comments]
+
+    def resolve_comment_poster(self, info, key):
+        comment = Comment.match(graph, key).first()
+        return [PersonSchema(**person.as_dict())
+                for person in comment.poster]
+
 
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
@@ -593,95 +667,10 @@ class Mutations(graphene.ObjectType):
     link_person_image = LinkPersonImage.Field()
     delink_person_image = DelinkPersonImage.Field()
 
+    link_person_comment = LinkPersonComment.Field()
+    delink_person_comment = DelinkPersonComment.Field()
+
 
 schema = graphene.Schema(query=Query,
                          mutation=Mutations,
                          auto_camelcase=False)
-
-create_comment = schema.execute(
-    '''
-    mutation createComment {
-        create_comment(comment_data: {key: "111aaa", text: "Comment text 1",
-        timestamp: "2019-05-20T02:50:31+05:30"}){
-            comment{
-                    key,
-                    text,
-                    timestamp
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_comment.data.items())
-print(json.dumps(items, indent=4))
-
-create_comment = schema.execute(
-    '''
-    mutation createComment {
-        create_comment(comment_data: {key: "111bbb", text: "Comment text 2",
-        timestamp: "2019-05-20T02:50:31+05:30"}){
-            comment{
-                    key,
-                    text,
-                    timestamp
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_comment.data.items())
-print(json.dumps(items, indent=4))
-
-create_comment = schema.execute(
-    '''
-    mutation createComment {
-        create_comment(comment_data: {key: "111ccc", text: "Comment text 1",
-        timestamp: "2019-05-20T02:50:31+05:30"}){
-            comment{
-                    key,
-                    text,
-                    timestamp
-            },
-            ok
-        }
-    }
-    '''
-)
-items = dict(create_comment.data.items())
-print(json.dumps(items, indent=4))
-
-"""
-query_comment = schema.execute(
-    '''
-    {
-        comment (key: "111aaa"){
-            key,
-            text,
-            timestamp
-        }
-    }
-    '''
-)
-items = dict(query_comment.data.items())
-print(json.dumps(items, indent=4))
-
-delete_comment = schema.execute(
-    '''
-    mutation deleteComment {
-        delete_comment(comment_data: {key: "111aaa"}) {
-            comment {
-                     key,
-                     text,
-                     timestamp
-            },
-            ok
-        }
-
-    }
-    '''
-)
-items = dict(delete_comment.data.items())
-print(json.dumps(items, indent=4))
-"""

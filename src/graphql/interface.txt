@@ -1,4 +1,3 @@
-"""
 create_landmark = schema.execute(
     '''
     mutation createLandMark {
@@ -845,4 +844,140 @@ delete_comment = schema.execute(
 )
 items = dict(delete_comment.data.items())
 print(json.dumps(items, indent=4))
-"""
+
+link_person_comment = schema.execute(
+    '''
+    mutation linkPersonComment {
+        link_person_comment(
+            person_comment_data: {
+                                  person_key: "333",
+                                  comment_key: "111aaa"})
+            {
+             person{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_person_comment.data.items())
+print(json.dumps(items, indent=4))
+
+link_person_comment = schema.execute(
+    '''
+    mutation linkPersonComment {
+        link_person_comment(
+            person_comment_data: {
+                                  person_key: "444",
+                                  comment_key: "111bbb"})
+            {
+             person{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_person_comment.data.items())
+print(json.dumps(items, indent=4))
+
+link_person_comment = schema.execute(
+    '''
+    mutation linkPersonComment {
+        link_person_comment(
+            person_comment_data: {
+                                  person_key: "222",
+                                  comment_key: "111ccc"})
+            {
+             person{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_person_comment.data.items())
+print(json.dumps(items, indent=4))
+
+link_friends = schema.execute(
+    '''
+    mutation linkFriends {
+        link_friends(
+            friends_data: {
+                           friend1_key: "111",
+                           friend2_key: "333"})
+            {
+             friend1{
+                     key,
+             },
+             friend2{
+                     key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_friends.data.items())
+print(json.dumps(items, indent=4))
+
+delink_friends = schema.execute(
+    '''
+    mutation delinkFriends {
+        delink_friends(
+            friends_data: {
+                           friend1_key: "111",
+                           friend2_key: "333"})
+            {
+             friend1{
+                     key,
+             },
+             friend2{
+                     key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(delink_friends.data.items())
+print(json.dumps(items, indent=4))
+
+query_person_posted_comments = schema.execute(
+    '''
+    {
+        person_posted_comments (key: "444"){
+            key,
+            text,
+            timestamp
+        }
+    }
+    '''
+)
+items = dict(query_person_posted_comments.data.items())
+print(json.dumps(items, indent=4))
+
+query_comment_poster = schema.execute(
+    '''
+    {
+        comment_poster (key: "111aaa"){
+            key,
+            name,
+        }
+    }
+    '''
+)
+items = dict(query_comment_poster.data.items())
+print(json.dumps(items, indent=4))
