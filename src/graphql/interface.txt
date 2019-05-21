@@ -1,10 +1,12 @@
+"""
 create_landmark = schema.execute(
     '''
     mutation createLandMark {
-        create_landmark(landmark_data: {name: "SOL", description: "NY",
-        latitude: -142.0010, longitude: 42.0001, city: "NYC", state: "NY",
-        country: "USA", continent: "NA"}) {
+        create_landmark(landmark_data: {key: "111222", name: "SOL",
+        description: "NY", latitude: -142.0010, longitude: 42.0001,
+        city: "NYC", state: "NY", country: "USA", continent: "NA"}) {
             landmark{
+                     key,
                      name,
                      description,
                      latitude,
@@ -25,10 +27,11 @@ print(json.dumps(items, indent=4))
 create_landmark = schema.execute(
     '''
     mutation createLandMark {
-        create_landmark(landmark_data: {name: "GSB", description: "SFO",
-        latitude: -100.0010, longitude: 60.0001, city: "SFO", state: "CA",
-        country: "USA", continent: "NA"}) {
+        create_landmark(landmark_data: {key: "222333", name: "GSB",
+        description: "SFO", latitude: -100.0010, longitude: 60.0001,
+        city: "SFO", state: "CA", country: "USA", continent: "NA"}) {
             landmark{
+                     key,
                      name,
                      description,
                      latitude,
@@ -92,13 +95,59 @@ create_person = schema.execute(
 items = dict(create_person.data.items())
 print(json.dumps(items, indent=4))
 
+create_person = schema.execute(
+    '''
+    mutation createPerson {
+        create_person(person_data: {key: "333", name: "Michael", rank: 12,
+        score: 131.90, bio: "test bio", email: "michael@gmail.com", phone:
+        "+14444444"}){
+            person{
+                   key,
+                   name,
+                   rank,
+                   score,
+                   bio,
+                   email,
+                   phone
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_person.data.items())
+print(json.dumps(items, indent=4))
+
+create_person = schema.execute(
+    '''
+    mutation createPerson {
+        create_person(person_data: {key: "444", name: "Erica", rank: 3,
+        score: 131.90, bio: "test bio", email: "erica@gmail.com", phone:
+        "+16666666"}){
+            person{
+                   key,
+                   name,
+                   rank,
+                   score,
+                   bio,
+                   email,
+                   phone
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_person.data.items())
+print(json.dumps(items, indent=4))
+
 link_landmark_visitor = schema.execute(
     '''
     mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "SOL", visitor_key:
-        "111"}){
+        link_landmark_visitor(visitor_data: {landmark_key: "111222",
+        visitor_key: "111"}){
             landmark{
-                     name,
+                     key,
             },
             visitor{
                    key,
@@ -114,10 +163,10 @@ print(json.dumps(items, indent=4))
 link_landmark_visitor = schema.execute(
     '''
     mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "GSB", visitor_key:
-        "222"}){
+        link_landmark_visitor(visitor_data: {landmark_key: "111222",
+        visitor_key: "222"}){
             landmark{
-                     name,
+                     key,
             },
             visitor{
                    key,
@@ -133,10 +182,10 @@ print(json.dumps(items, indent=4))
 link_landmark_visitor = schema.execute(
     '''
     mutation linkLandMarkVisitor {
-        link_landmark_visitor(visitor_data: {landmark_name: "GSB", visitor_key:
-        "111"}){
+        link_landmark_visitor(visitor_data: {landmark_key: "222333",
+        visitor_key: "111"}){
             landmark{
-                     name,
+                     key,
             },
             visitor{
                    key,
@@ -149,14 +198,13 @@ link_landmark_visitor = schema.execute(
 items = dict(link_landmark_visitor.data.items())
 print(json.dumps(items, indent=4))
 
-"""
 delink_landmark_visitor = schema.execute(
     '''
     mutation delinkLandMarkVisitor {
-        delink_landmark_visitor(visitor_data: {landmark_name: "SOL",
+        delink_landmark_visitor(visitor_data: {landmark_key: "111222",
         visitor_key: "111"}){
             landmark{
-                     name,
+                     key,
             },
             visitor{
                    key,
@@ -168,12 +216,12 @@ delink_landmark_visitor = schema.execute(
 )
 items = dict(delink_landmark_visitor.data.items())
 print(json.dumps(items, indent=4))
-"""
 
 query_landmark = schema.execute(
     '''
     {
-        landmark (name: "SOL"){
+        landmark (key: "111222"){
+            key,
             name,
             description,
             latitude,
@@ -210,7 +258,7 @@ print(json.dumps(items, indent=4))
 query_landmark_visitors = schema.execute(
     '''
     {
-        landmark_visitors (name: "SOL"){
+        landmark_visitors (key: "111222"){
             key,
             name,
             rank,
@@ -229,6 +277,7 @@ query_person_visits = schema.execute(
     '''
     {
         person_visits (key: "111"){
+            key,
             name,
             description,
             latitude,
@@ -244,12 +293,12 @@ query_person_visits = schema.execute(
 items = dict(query_person_visits.data.items())
 print(json.dumps(items, indent=4))
 
-"""
 delete_landmark = schema.execute(
     '''
     mutation deleteLandMark {
-        delete_landmark(landmark_data: {name: "SOL"}) {
+        delete_landmark(landmark_data: {key: "111222"}) {
             landmark{
+                     key,
                      name,
                      description,
                      latitude,
@@ -289,9 +338,7 @@ delete_person = schema.execute(
 )
 items = dict(delete_person.data.items())
 print(json.dumps(items, indent=4))
-"""
 
-"""
 create_image = schema.execute(
     '''
     mutation createImage {
@@ -401,11 +448,11 @@ link_landmark_image = schema.execute(
     mutation linkLandMarkImage {
         link_landmark_image(
             landmark_image_data: {
-                                  landmark_name: "GSB",
+                                  landmark_key: "222333",
                                   image_key: "bbb111"})
             {
              landmark{
-                      name,
+                      key,
              },
              image{
                    key,
@@ -423,11 +470,11 @@ link_landmark_image = schema.execute(
     mutation linkLandMarkImage {
         link_landmark_image(
             landmark_image_data: {
-                                  landmark_name: "SOL",
+                                  landmark_key: "111222",
                                   image_key: "aaa111"})
             {
              landmark{
-                      name,
+                      key,
              },
              image{
                    key,
@@ -445,11 +492,11 @@ link_landmark_image = schema.execute(
     mutation linkLandMarkImage {
         link_landmark_image(
             landmark_image_data: {
-                                  landmark_name: "SOL",
+                                  landmark_key: "111222",
                                   image_key: "aaa222"})
             {
              landmark{
-                      name,
+                      key,
              },
              image{
                    key,
@@ -467,11 +514,11 @@ delink_landmark_image = schema.execute(
     mutation delinkLandMarkImage {
         delink_landmark_image(
             landmark_image_data: {
-                                  landmark_name: "SOL",
+                                  landmark_key: "111222",
                                   image_key: "aaa222"})
             {
              landmark{
-                      name,
+                      key,
              },
              image{
                    key,
@@ -483,12 +530,11 @@ delink_landmark_image = schema.execute(
 )
 items = dict(delink_landmark_image.data.items())
 print(json.dumps(items, indent=4))
-"""
 
 query_landmark_images = schema.execute(
     '''
     {
-        landmark_images (name: "SOL"){
+        landmark_images (key: "111222"){
             key,
             url,
             description,
@@ -502,7 +548,6 @@ query_landmark_images = schema.execute(
 items = dict(query_landmark_images.data.items())
 print(json.dumps(items, indent=4))
 
-"""
 link_friends = schema.execute(
     '''
     mutation linkFriends {
@@ -551,14 +596,13 @@ query_image_landmark = schema.execute(
     '''
     {
         image_landmark (key: "aaa111"){
-            name,
+            key,
         }
     }
     '''
 )
 items = dict(query_image_landmark.data.items())
 print(json.dumps(items, indent=4))
-"""
 
 query_friends = schema.execute(
     '''
@@ -594,7 +638,6 @@ link_following = schema.execute(
 items = dict(link_following.data.items())
 print(json.dumps(items, indent=4))
 
-"""
 delink_following = schema.execute(
     '''
     mutation delinkFollowing {
@@ -616,12 +659,11 @@ delink_following = schema.execute(
 )
 items = dict(delink_following.data.items())
 print(json.dumps(items, indent=4))
-"""
 
 query_followers = schema.execute(
     '''
     {
-        followers (key: "333"){
+        followers (key: "444"){
             key,
             name
         }
@@ -644,7 +686,6 @@ query_followings = schema.execute(
 items = dict(query_followings.data.items())
 print(json.dumps(items, indent=4))
 
-"""
 link_person_image = schema.execute(
     '''
     mutation linkPersonImage {
@@ -705,7 +746,6 @@ query_person_posted_images = schema.execute(
 )
 items = dict(query_person_posted_images.data.items())
 print(json.dumps(items, indent=4))
-"""
 
 query_image_poster = schema.execute(
     '''
@@ -719,4 +759,5 @@ query_image_poster = schema.execute(
 )
 items = dict(query_image_poster.data.items())
 print(json.dumps(items, indent=4))
+"""
 

@@ -15,6 +15,7 @@ class CustomGrapheneDateTime(graphene.DateTime):
 
 
 class LandMarkSchema(graphene.ObjectType):
+    key = graphene.String()
     name = graphene.String()
     description = graphene.String()
 
@@ -28,7 +29,8 @@ class LandMarkSchema(graphene.ObjectType):
 
 
 class LandMarkInput(graphene.InputObjectType):
-    name = graphene.String(required=True)
+    key = graphene.String(required=True)
+    name = graphene.String()
     description = graphene.String()
 
     # Location information
@@ -80,13 +82,13 @@ class ImageInput(graphene.InputObjectType):
 
 # LandMark Person relationship
 class VisitorInput(graphene.InputObjectType):
-    landmark_name = graphene.String(required=True)
+    landmark_key = graphene.String(required=True)
     visitor_key = graphene.String(required=True)
 
 
 # LandMark Image relationship
 class LandMarkImageInput(graphene.InputObjectType):
-    landmark_name = graphene.String(required=True)
+    landmark_key = graphene.String(required=True)
     image_key = graphene.String(required=True)
 
 
