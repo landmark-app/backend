@@ -78,6 +78,6 @@ class Image(GraphObject):
 
 
 # To avoid cyclic dependency import error
-from commentgo import Comment  # noqa: E402 F401
-from landmarkgo import LandMark  # noqa: E402 F401
-from persongo import Person  # noqa: E402 F401
+from .commentgo import Comment  # noqa: E402 F401
+from .landmarkgo import LandMark  # noqa: E402 F401
+from .persongo import Person  # noqa: E402 F401

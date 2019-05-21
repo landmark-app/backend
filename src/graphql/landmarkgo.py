@@ -85,5 +85,5 @@ class LandMark(GraphObject):
 
 
 # To avoid cyclic dependency import error
-from imagego import Image  # noqa: E402 F401
-from persongo import Person  # noqa: E402 F401
+from .imagego import Image  # noqa: E402 F401
+from .persongo import Person  # noqa: E402 F401

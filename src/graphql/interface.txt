@@ -981,3 +981,117 @@ query_comment_poster = schema.execute(
 )
 items = dict(query_comment_poster.data.items())
 print(json.dumps(items, indent=4))
+
+link_image_comment = schema.execute(
+    '''
+    mutation linkImageComment {
+        link_image_comment(
+            image_comment_data: {
+                                 image_key: "bbb111",
+                                 comment_key: "111ccc"})
+            {
+             image{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_image_comment.data.items())
+print(json.dumps(items, indent=4))
+
+delink_image_comment = schema.execute(
+    '''
+    mutation delinkImageComment {
+        delink_image_comment(
+            image_comment_data: {
+                                 image_key: "bbb111",
+                                 comment_key: "111ccc"})
+            {
+             image{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(delink_image_comment.data.items())
+print(json.dumps(items, indent=4))
+
+link_image_comment = schema.execute(
+    '''
+    mutation linkImageComment {
+        link_image_comment(
+            image_comment_data: {
+                                 image_key: "bbb111",
+                                 comment_key: "111ccc"})
+            {
+             image{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_image_comment.data.items())
+print(json.dumps(items, indent=4))
+
+link_image_comment = schema.execute(
+    '''
+    mutation linkImageComment {
+        link_image_comment(
+            image_comment_data: {
+                                 image_key: "bbb111",
+                                 comment_key: "111aaa"})
+            {
+             image{
+                    key,
+             },
+             comment{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_image_comment.data.items())
+print(json.dumps(items, indent=4))
+
+query_image_comments = schema.execute(
+    '''
+    {
+        image_comments (key: "bbb111"){
+            key,
+            text,
+        }
+    }
+    '''
+)
+items = dict(query_image_comments.data.items())
+print(json.dumps(items, indent=4))
+
+query_comment_image = schema.execute(
+    '''
+    {
+        comment_image (key: "111ccc"){
+            key,
+        }
+    }
+    '''
+)
+items = dict(query_comment_image.data.items())
+print(json.dumps(items, indent=4))
+

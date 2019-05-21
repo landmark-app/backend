@@ -1,16 +1,15 @@
 import graphene
-import json
 from py2neo import Graph
 
 # Internal imports
-from commentgo import Comment
-from imagego import Image
-from landmarkgo import LandMark
-from persongo import Person
-from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
+from .commentgo import Comment
+from .imagego import Image
+from .landmarkgo import LandMark
+from .persongo import Person
+from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
     FriendsInput, FollowingInput, PersonImageInput, CommentSchema,\
-    CommentInput, PersonCommentInput
+    CommentInput, PersonCommentInput, ImageCommentInput
 
 # Environment variables
 """
@@ -459,6 +458,63 @@ class DelinkPersonComment(graphene.Mutation):
         return DelinkPersonComment(person=person, comment=comment, ok=ok)
 
 
+# Relationship between image and comment
+class LinkImageComment(graphene.Mutation):
+
+    class Arguments:
+        image_comment_data = ImageCommentInput(required=True)
+
+    image = graphene.Field(PersonSchema)
+    comment = graphene.Field(CommentSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, image_comment_data=None):
+        image = Image.match(graph, image_comment_data.image_key).first()
+        comment = Comment.match(graph, image_comment_data.comment_key).first()
+
+        if not image or not comment:
+            ok = False
+            return LinkImageComment(image=None, comment=None, ok=ok)
+
+        image.add_or_update_comment(comment)
+        image.save(graph)
+
+        comment.add_or_update_image(image)
+        comment.save(graph)
+        ok = True
+
+        return LinkImageComment(image=image, comment=comment, ok=ok)
+
+
+class DelinkImageComment(graphene.Mutation):
+
+    class Arguments:
+        image_comment_data = ImageCommentInput(required=True)
+
+    image = graphene.Field(PersonSchema)
+    comment = graphene.Field(CommentSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, image_comment_data=None):
+        image = Image.match(graph, image_comment_data.image_key).first()
+        comment = Comment.match(graph, image_comment_data.comment_key).first()
+
+        if not image or not comment:
+            ok = False
+            return DelinkImageComment(image=None, comment=None, ok=ok)
+
+        image.remove_comment(comment)
+        image.save(graph)
+
+        comment.remove_image(image)
+        comment.save(graph)
+        ok = True
+
+        return DelinkImageComment(image=image, comment=comment, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -567,6 +623,12 @@ class Query(graphene.ObjectType):
     # Query to fetch poster of a particular comment
     comment_poster = graphene.List(PersonSchema, key=graphene.String())
 
+    # Query to fetch comments posted on a particular image
+    image_comments = graphene.List(CommentSchema, key=graphene.String())
+
+    # Query to fetch image associated with a particular comment
+    comment_image = graphene.List(ImageSchema, key=graphene.String())
+
     def resolve_landmark(self, info, key):
         landmark = LandMark.match(graph, key).first()
         return LandMarkSchema(**landmark.as_dict())
@@ -638,6 +700,16 @@ class Query(graphene.ObjectType):
         return [PersonSchema(**person.as_dict())
                 for person in comment.poster]
 
+    def resolve_image_comments(self, info, key):
+        image = Image.match(graph, key).first()
+        return [CommentSchema(**comment.as_dict())
+                for comment in image.comments]
+
+    def resolve_comment_image(self, info, key):
+        comment = Comment.match(graph, key).first()
+        return [ImageSchema(**image.as_dict())
+                for image in comment.image]
+
 
 class Mutations(graphene.ObjectType):
     create_landmark = CreateLandMark.Field()
@@ -669,6 +741,9 @@ class Mutations(graphene.ObjectType):
 
     link_person_comment = LinkPersonComment.Field()
     delink_person_comment = DelinkPersonComment.Field()
+
+    link_image_comment = LinkImageComment.Field()
+    delink_image_comment = DelinkImageComment.Field()
 
 
 schema = graphene.Schema(query=Query,

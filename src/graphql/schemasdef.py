@@ -126,3 +126,9 @@ class PersonImageInput(graphene.InputObjectType):
 class PersonCommentInput(graphene.InputObjectType):
     person_key = graphene.String(required=True)
     comment_key = graphene.String(required=True)
+
+
+# Person Comment relationship
+class ImageCommentInput(graphene.InputObjectType):
+    image_key = graphene.String(required=True)
+    comment_key = graphene.String(required=True)
