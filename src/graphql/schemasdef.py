@@ -80,6 +80,18 @@ class ImageInput(graphene.InputObjectType):
     timestamp = CustomGrapheneDateTime()
 
 
+class CommentSchema(graphene.ObjectType):
+    key = graphene.String()
+    text = graphene.String()
+    timestamp = CustomGrapheneDateTime()
+
+
+class CommentInput(graphene.InputObjectType):
+    key = graphene.String(required=True)
+    text = graphene.String()
+    timestamp = CustomGrapheneDateTime()
+
+
 # LandMark Person relationship
 class VisitorInput(graphene.InputObjectType):
     landmark_key = graphene.String(required=True)

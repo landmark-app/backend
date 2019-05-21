@@ -759,5 +759,90 @@ query_image_poster = schema.execute(
 )
 items = dict(query_image_poster.data.items())
 print(json.dumps(items, indent=4))
-"""
 
+create_comment = schema.execute(
+    '''
+    mutation createComment {
+        create_comment(comment_data: {key: "111aaa", text: "Comment text 1",
+        timestamp: "2019-05-20T02:50:31+05:30"}){
+            comment{
+                    key,
+                    text,
+                    timestamp
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_comment.data.items())
+print(json.dumps(items, indent=4))
+
+create_comment = schema.execute(
+    '''
+    mutation createComment {
+        create_comment(comment_data: {key: "111bbb", text: "Comment text 2",
+        timestamp: "2019-05-20T02:50:31+05:30"}){
+            comment{
+                    key,
+                    text,
+                    timestamp
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_comment.data.items())
+print(json.dumps(items, indent=4))
+
+create_comment = schema.execute(
+    '''
+    mutation createComment {
+        create_comment(comment_data: {key: "111ccc", text: "Comment text 1",
+        timestamp: "2019-05-20T02:50:31+05:30"}){
+            comment{
+                    key,
+                    text,
+                    timestamp
+            },
+            ok
+        }
+    }
+    '''
+)
+items = dict(create_comment.data.items())
+print(json.dumps(items, indent=4))
+
+query_comment = schema.execute(
+    '''
+    {
+        comment (key: "111aaa"){
+            key,
+            text,
+            timestamp
+        }
+    }
+    '''
+)
+items = dict(query_comment.data.items())
+print(json.dumps(items, indent=4))
+
+delete_comment = schema.execute(
+    '''
+    mutation deleteComment {
+        delete_comment(comment_data: {key: "111aaa"}) {
+            comment {
+                     key,
+                     text,
+                     timestamp
+            },
+            ok
+        }
+
+    }
+    '''
+)
+items = dict(delete_comment.data.items())
+print(json.dumps(items, indent=4))
+"""

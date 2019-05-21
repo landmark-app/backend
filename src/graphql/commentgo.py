@@ -3,7 +3,9 @@ from py2neo.ogm import RelatedTo, RelatedFrom
 
 
 class Comment(GraphObject):
+    __primarykey__ = "key"
 
+    key = Property()
     text = Property()
     timestamp = Property()
 
@@ -23,6 +25,7 @@ class Comment(GraphObject):
 
     def as_dict(self):
         return {
+            'key': self.key,
             'text': self.text,
             'timestamp': self.timestamp
         }
