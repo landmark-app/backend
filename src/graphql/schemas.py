@@ -8,7 +8,7 @@ from landmarkgo import LandMark
 from persongo import Person
 from schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
-    FriendsInput, FollowingInput
+    FriendsInput, FollowingInput, PersonImageInput
 
 # Environment variables
 """
@@ -323,6 +323,63 @@ class DelinkFollowing(graphene.Mutation):
         return DelinkFollowing(person=person, follower=follower, ok=ok)
 
 
+# Relationship between person and image posted
+class LinkPersonImage(graphene.Mutation):
+
+    class Arguments:
+        person_image_data = PersonImageInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_image_data=None):
+        person = Person.match(graph, person_image_data.person_key).first()
+        image = Image.match(graph, person_image_data.image_key).first()
+
+        if not person or not image:
+            ok = False
+            return LinkPersonImage(person=None, image=None, ok=ok)
+
+        person.add_or_update_posted_image(image)
+        person.save(graph)
+
+        image.add_or_update_poster(person)
+        image.save(graph)
+        ok = True
+
+        return LinkPersonImage(person=person, image=image, ok=ok)
+
+
+class DelinkPersonImage(graphene.Mutation):
+
+    class Arguments:
+        person_image_data = PersonImageInput(required=True)
+
+    person = graphene.Field(PersonSchema)
+    image = graphene.Field(ImageSchema)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, person_image_data=None):
+        person = Person.match(graph, person_image_data.person_key).first()
+        image = Image.match(graph, person_image_data.image_key).first()
+
+        if not person or not image:
+            ok = False
+            return LinkPersonImage(person=None, image=None, ok=ok)
+
+        person.remove_posted_image(image)
+        person.save(graph)
+
+        image.remove_poster(person)
+        image.save(graph)
+        ok = True
+
+        return LinkPersonImage(person=person, image=image, ok=ok)
+
+
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
@@ -375,7 +432,6 @@ class DeleteImage(graphene.Mutation):
 
 
 class Query(graphene.ObjectType):
-    # landmarks = graphene.List(LandMarkSchema, name=graphene.String())
     landmark = graphene.Field(LandMarkSchema, name=graphene.String())
     person = graphene.Field(PersonSchema, key=graphene.String())
     image = graphene.Field(ImageSchema, key=graphene.String())
@@ -389,8 +445,8 @@ class Query(graphene.ObjectType):
     # Query to fetch all images of a particular landmark
     landmark_images = graphene.List(ImageSchema, name=graphene.String())
 
-    # Query to fetch all landmarks in a particular image
-    image_landmarks = graphene.List(LandMarkSchema, key=graphene.String())
+    # Query to fetch landmark in a particular image
+    image_landmark = graphene.List(LandMarkSchema, key=graphene.String())
 
     # Query to fetch all friends of a person
     friends = graphene.List(PersonSchema, key=graphene.String())
@@ -401,9 +457,14 @@ class Query(graphene.ObjectType):
     # Query to fetch all followers of a person
     followings = graphene.List(PersonSchema, key=graphene.String())
 
+    # Query to fetch all images posted by a person
+    person_posted_images = graphene.List(ImageSchema, key=graphene.String())
+
+    # Query to fetch poster of a particular image
+    image_poster = graphene.List(PersonSchema, key=graphene.String())
+
     def resolve_landmark(self, info, name):
         landmark = LandMark.match(graph, name).first()
-        # return [LandMarkSchema(**landmarks.as_dict())]
         return LandMarkSchema(**landmark.as_dict())
 
     def resolve_person(self, info, key):
@@ -429,7 +490,7 @@ class Query(graphene.ObjectType):
         return [ImageSchema(**image.as_dict())
                 for image in landmark.images]
 
-    def resolve_image_landmarks(self, info, key):
+    def resolve_image_landmark(self, info, key):
         image = Image.match(graph, key).first()
         return [LandMarkSchema(**landmark.as_dict())
                 for landmark in image.landmarks]
@@ -448,6 +509,16 @@ class Query(graphene.ObjectType):
         person = Person.match(graph, key).first()
         return [PersonSchema(**following.as_dict())
                 for following in person.followings]
+
+    def resolve_person_posted_images(self, info, key):
+        person = Person.match(graph, key).first()
+        return [ImageSchema(**image.as_dict())
+                for image in person.posted_images]
+
+    def resolve_image_poster(self, info, key):
+        image = Image.match(graph, key).first()
+        return [PersonSchema(**person.as_dict())
+                for person in image.poster]
 
 
 class Mutations(graphene.ObjectType):
@@ -471,6 +542,9 @@ class Mutations(graphene.ObjectType):
 
     link_following = LinkFollowing.Field()
     delink_following = DelinkFollowing.Field()
+
+    link_person_image = LinkPersonImage.Field()
+    delink_person_image = DelinkPersonImage.Field()
 
 
 schema = graphene.Schema(query=Query,

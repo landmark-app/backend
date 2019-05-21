@@ -12,14 +12,14 @@ class Image(GraphObject):
     private = Property()
     timestamp = Property()
 
-    # Set of Images posted by a Person
-    posters = RelatedFrom("Person", "IMAGES_POSTED")
+    # Image posted by a Person
+    poster = RelatedFrom("Person", "IMAGES_POSTED")
 
     # Set of Comments posted on the Image
     comments = RelatedFrom("Comment", "COMMENT_ON")
 
-    # Set of Images of particular LandMark
-    landmarks = RelatedTo("LandMark")
+    # Image of particular LandMark
+    landmark = RelatedTo("LandMark")
 
     def add_or_update(self, **kwargs):
         for key, value in kwargs.items():
@@ -43,19 +43,11 @@ class Image(GraphObject):
         self.add_or_update(**kwargs)
 
     # List interfaces
-    def add_or_update_posters(self, posters):
-        for poster in posters:
-            self.posters.update(poster)
-
     def add_or_update_poster(self, poster):
-        self.posters.update(poster)
-
-    def remove_posters(self, posters):
-        for poster in posters:
-            self.posters.remove(poster)
+        self.poster.update(poster)
 
     def remove_poster(self, poster):
-        self.posters.remove(poster)
+        self.poster.remove(poster)
 
     def add_or_update_comments(self, comments):
         for comment in comments:
@@ -71,19 +63,11 @@ class Image(GraphObject):
     def remove_comment(self, comment):
         self.comments.remove(comment)
 
-    def add_or_update_landmarks(self, landmarks):
-        for landmark in landmarks:
-            self.landmarks.update(landmark)
-
     def add_or_update_landmark(self, landmark):
-        self.landmarks.update(landmark)
-
-    def remove_landmarks(self, landmarks):
-        for landmark in landmarks:
-            self.landmarks.remove(landmark)
+        self.landmark.update(landmark)
 
     def remove_landmark(self, landmark):
-        self.landmarks.remove(landmark)
+        self.landmark.remove(landmark)
 
     # Object level interfaces
     def save(self, graph):

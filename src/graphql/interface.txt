@@ -547,16 +547,16 @@ delink_friends = schema.execute(
 items = dict(delink_friends.data.items())
 print(json.dumps(items, indent=4))
 
-query_image_landmarks = schema.execute(
+query_image_landmark = schema.execute(
     '''
     {
-        image_landmarks (key: "aaa111"){
+        image_landmark (key: "aaa111"){
             name,
         }
     }
     '''
 )
-items = dict(query_image_landmarks.data.items())
+items = dict(query_image_landmark.data.items())
 print(json.dumps(items, indent=4))
 """
 
@@ -642,5 +642,81 @@ query_followings = schema.execute(
     '''
 )
 items = dict(query_followings.data.items())
+print(json.dumps(items, indent=4))
+
+"""
+link_person_image = schema.execute(
+    '''
+    mutation linkPersonImage {
+        link_person_image(
+            person_image_data: {
+                                person_key: "111",
+                                image_key: "bbb111"})
+            {
+             person{
+                    key,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(link_person_image.data.items())
+print(json.dumps(items, indent=4))
+
+delink_person_image = schema.execute(
+    '''
+    mutation delinkPersonImage {
+        delink_person_image(
+            person_image_data: {
+                                person_key: "111",
+                                image_key: "bbb111"})
+            {
+             person{
+                    key,
+             },
+             image{
+                   key,
+             },
+             ok
+        }
+    }
+    '''
+)
+items = dict(delink_person_image.data.items())
+print(json.dumps(items, indent=4))
+
+query_person_posted_images = schema.execute(
+    '''
+    {
+        person_posted_images (key: "111"){
+            key,
+            url,
+            description,
+            score,
+            private,
+            timestamp
+        }
+    }
+    '''
+)
+items = dict(query_person_posted_images.data.items())
+print(json.dumps(items, indent=4))
+"""
+
+query_image_poster = schema.execute(
+    '''
+    {
+        image_poster (key: "bbb111"){
+            key,
+            name,
+        }
+    }
+    '''
+)
+items = dict(query_image_poster.data.items())
 print(json.dumps(items, indent=4))
 

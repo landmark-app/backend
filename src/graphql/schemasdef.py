@@ -100,3 +100,9 @@ class FriendsInput(graphene.InputObjectType):
 class FollowingInput(graphene.InputObjectType):
     person_key = graphene.String(required=True)
     follower_key = graphene.String(required=True)
+
+
+# Person Image relationship
+class PersonImageInput(graphene.InputObjectType):
+    person_key = graphene.String(required=True)
+    image_key = graphene.String(required=True)
