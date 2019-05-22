@@ -1,4 +1,5 @@
 import graphene
+import os
 from py2neo import Graph
 
 # Internal imports
@@ -12,14 +13,15 @@ from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     CommentInput, PersonCommentInput, ImageCommentInput
 
 # Environment variables
-"""
 url = os.environ['NEO4J_URL']
 username = os.environ['NEO4J_USERNAME']
 password = os.environ['NEO4J_PASSWORD']
+
 """
 url = "bolt://localhost:11007"
 username = "neo4j"
 password = "landmark"
+"""
 
 # Global variables
 graph = Graph(url, auth=(username, password))
