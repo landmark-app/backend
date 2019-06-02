@@ -1,0 +1,1172 @@
+Create LandMark:
+mutation createLandMark {
+    create_landmark(landmark_data: {name: "SOL", description: "NY",
+	latitude: -142.0010, longitude: 42.0001, city: "NYC", state: "NY",
+	country: "USA", continent: "NA"}) {
+        landmark{
+                 name,
+                 description,
+                 latitude,
+                 longitude,
+                 city,
+                 state,
+                 country,
+                 continent
+        },
+		key,
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "create_landmark": {
+      "landmark": {
+        "name": "SOL",
+        "description": "NY",
+        "latitude": -142.001,
+        "longitude": 42.0001,
+        "city": "NYC",
+        "state": "NY",
+        "country": "USA",
+        "continent": "NA"
+      },
+      "key": 0,
+      "ok": true
+    }
+  }
+}
+
+Query LandMark:
+{
+    landmark (key: 0){
+        key,
+        name,
+        description,
+        latitude,
+        longitude,
+        city,
+        state,
+        country,
+        continent
+    }
+}
+
+Response:
+{
+  "data": {
+    "landmark": {
+      "key": 0,
+      "name": "SOL",
+      "description": "NY",
+      "latitude": -142.001,
+      "longitude": 42.0001,
+      "city": "NYC",
+      "state": "NY",
+      "country": "USA",
+      "continent": "NA"
+    }
+  }
+}
+
+Delete LandMark:
+mutation deleteLandMark {
+    delete_landmark(landmark_data: {key: 0}) {
+        landmark{
+                 name,
+                 description,
+                 latitude,
+                 longitude,
+                 city,
+                 state,
+                 country,
+                 continent
+        },
+        ok
+    }
+
+}
+
+Response:
+{
+  "data": {
+    "delete_landmark": {
+      "landmark": {
+        "name": "SOL",
+        "description": "NY",
+        "latitude": -142.001,
+        "longitude": 42.0001,
+        "city": "NYC",
+        "state": "NY",
+        "country": "USA",
+        "continent": "NA"
+      },
+      "ok": true
+    }
+  }
+}
+
+Create Person:
+mutation createPerson {
+    create_person(person_data: {key: "111", name: "Alice", rank: 100,
+    score: 1000.5, bio: "Alice's bio", email: "alice@dummy.com", phone:
+    "+1-1111-1111"}){
+        person{
+               key,
+               name,
+               rank,
+               score,
+               bio,
+               email,
+               phone
+        },
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "create_person": {
+      "person": {
+        "key": "111",
+        "name": "Alice",
+        "rank": 100,
+        "score": 1000.5,
+        "bio": "Alice's bio",
+        "email": "alice@dummy.com",
+        "phone": "+1-1111-1111"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Person:
+{
+    person (key: "111"){
+        key,
+        name,
+        rank,
+        score,
+        bio,
+        email,
+        phone
+    }
+}
+
+Response:
+{
+  "data": {
+    "person": {
+      "key": "111",
+      "name": "Alice",
+      "rank": 100,
+      "score": 1000.5,
+      "bio": "Alice's bio",
+      "email": "alice@dummy.com",
+      "phone": "+1-1111-1111"
+    }
+  }
+}
+
+Delete Person:
+mutation deletePerson {
+    delete_person(person_data: {key: "111"}) {
+        person{
+               key,
+               name,
+               rank,
+               score,
+               bio,
+               email,
+               phone
+        },
+        ok
+    }
+
+}
+
+Response:
+{
+  "data": {
+    "delete_person": {
+      "person": {
+        "key": "111",
+        "name": "Alice",
+        "rank": 100,
+        "score": 1000.5,
+        "bio": "Alice's bio",
+        "email": "alice@dummy.com",
+        "phone": "+1-1111-1111"
+      },
+      "ok": true
+    }
+  }
+}
+
+Create Image:
+mutation createImage {
+    create_image(image_data: {key: "111aaa", url: "https://image1",
+    description: "SOL1", score: 80.4, private: false, timestamp:
+    "2019-06-02T13:44:31+05:30"}){
+        image{
+              key,
+              url,
+              description,
+              score,
+              private,
+              timestamp
+        },
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "create_image": {
+      "image": {
+        "key": "111aaa",
+        "url": "https://image1",
+        "description": "SOL1",
+        "score": 80.4,
+        "private": false,
+        "timestamp": "2019-06-02T13:44:31+05:30"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Image:
+{
+    image (key: "111aaa"){
+        key,
+        url,
+        description,
+        score,
+        private,
+        timestamp
+    }
+}
+
+Response:
+{
+  "data": {
+    "image": {
+      "key": "111aaa",
+      "url": "https://image1",
+      "description": "SOL1",
+      "score": 80.4,
+      "private": false,
+      "timestamp": "2019-06-02T13:44:31+05:30"
+    }
+  }
+}
+
+Delete Image:
+mutation deleteImage {
+    delete_image(image_data: {key: "111aaa"}) {
+        image{
+              key,
+              url,
+              description,
+              score,
+              private,
+              timestamp
+        },
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delete_image": {
+      "image": {
+        "key": "111aaa",
+        "url": "https://image1",
+        "description": "SOL1",
+        "score": 80.4,
+        "private": false,
+        "timestamp": "2019-06-02T13:44:31+05:30"
+      },
+      "ok": true
+    }
+  }
+}
+
+Create Comment:
+mutation createComment {
+    create_comment(comment_data: {text: "Comment text 1",
+    timestamp: "2019-06-02T13:53:31+05:30"}){
+        comment{
+                text,
+                timestamp
+        },
+		key,
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "create_comment": {
+      "comment": {
+        "text": "Comment text 1",
+        "timestamp": "2019-06-02T13:53:31+05:30"
+      },
+      "key": 3,
+      "ok": true
+    }
+  }
+}
+
+Query Comment:
+{
+    comment (key: 3){
+	    key,
+        text,
+        timestamp
+    }
+}
+
+Response:
+{
+  "data": {
+    "comment": {
+      "key": 3,
+      "text": "Comment text 1",
+      "timestamp": "2019-06-02T13:53:31+05:30"
+    }
+  }
+}
+
+Delete Comment:
+mutation deleteComment {
+    delete_comment(comment_data: {key: 3}) {
+        comment {
+                 text,
+                 timestamp
+        },
+        ok
+    }
+
+}
+
+Response:
+{
+  "data": {
+    "delete_comment": {
+      "comment": {
+        "text": "Comment text 1",
+        "timestamp": "2019-06-02T13:53:31+05:30"
+      },
+      "ok": true
+    }
+  }
+}
+
+Link LandMark to Visitors:
+mutation linkLandMarkVisitor {
+    link_landmark_visitor(visitor_data: {landmark_key: 0,
+    visitor_key: "111"}){
+        landmark{
+                 name,
+        },
+        visitor{
+               key,
+        },
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_landmark_visitor": {
+      "landmark": {
+        "name": "SOL"
+      },
+      "visitor": {
+        "key": "111"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink LandMark to Visitors:
+mutation delinkLandMarkVisitor {
+    delink_landmark_visitor(visitor_data: {landmark_key: 0,
+    visitor_key: "111"}){
+        landmark{
+                 name,
+        },
+        visitor{
+               key,
+        },
+        ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_landmark_visitor": {
+      "landmark": {
+        "name": "SOL"
+      },
+      "visitor": {
+        "key": "111"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query LandMark Visitors:
+{
+    landmark_visitors (key: 0){
+        key,
+        name,
+        rank,
+        score,
+        bio,
+        email,
+        phone
+    }
+}
+
+Response:
+{
+  "data": {
+    "landmark_visitors": [
+      {
+        "key": "333",
+        "name": "Carol",
+        "rank": 25,
+        "score": 3000.5,
+        "bio": "Carol's bio",
+        "email": "carol@dummy.com",
+        "phone": "+1-3333-3333"
+      },
+      {
+        "key": "222",
+        "name": "Bob",
+        "rank": 50,
+        "score": 2000.5,
+        "bio": "Bob's bio",
+        "email": "bob@dummy.com",
+        "phone": "+1-2222-2222"
+      },
+      {
+        "key": "111",
+        "name": "Alice",
+        "rank": 100,
+        "score": 1000.5,
+        "bio": "Alice's bio",
+        "email": "alice@dummy.com",
+        "phone": "+1-1111-1111"
+      }
+    ]
+  }
+}
+
+Query Person Visits:
+{
+    person_visits (key: "111"){
+        key,
+        name,
+        description,
+        latitude,
+        longitude,
+        city,
+        state,
+        country,
+        continent
+    }
+}
+
+Response:
+{
+  "data": {
+    "person_visits": [
+      {
+        "key": 56,
+        "name": "GSB",
+        "description": "SFO",
+        "latitude": -122.001,
+        "longitude": 42.0001,
+        "city": "SFO",
+        "state": "CA",
+        "country": "USA",
+        "continent": "NA"
+      },
+      {
+        "key": 0,
+        "name": "SOL",
+        "description": "NY",
+        "latitude": -142.001,
+        "longitude": 42.0001,
+        "city": "NYC",
+        "state": "NY",
+        "country": "USA",
+        "continent": "NA"
+      }
+    ]
+  }
+}
+
+Link LandMark Image:
+mutation linkLandMarkImage {
+    link_landmark_image(
+        landmark_image_data: {
+                              landmark_key: 0,
+                              image_key: "111aaa"})
+        {
+         landmark{
+                  name,
+         },
+         image{
+               key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_landmark_image": {
+      "landmark": {
+        "name": "SOL"
+      },
+      "image": {
+        "key": "111aaa"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink LandMark Image:
+mutation delinkLandMarkImage {
+    delink_landmark_image(
+        landmark_image_data: {
+                              landmark_key: 0,
+                              image_key: "111aaa"})
+        {
+         landmark{
+                  name,
+         },
+         image{
+               key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_landmark_image": {
+      "landmark": {
+        "name": "SOL"
+      },
+      "image": {
+        "key": "111aaa"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query LandMark Images:
+{
+    landmark_images (key: 0){
+        key,
+        url,
+        description,
+        score,
+        private,
+        timestamp
+    }
+}
+
+Response:
+{
+  "data": {
+    "landmark_images": [
+      {
+        "key": "111bbb",
+        "url": "https://image2",
+        "description": "SOL2",
+        "score": 96.8,
+        "private": true,
+        "timestamp": "2019-06-02T13:50:31+05:30"
+      },
+      {
+        "key": "111aaa",
+        "url": "https://image1",
+        "description": "SOL1",
+        "score": 80.4,
+        "private": false,
+        "timestamp": "2019-06-02T13:44:31+05:30"
+      }
+    ]
+  }
+}
+
+Query Image LandMark:
+{
+    image_landmark (key: "111aaa"){
+        key,
+        name
+    }
+}
+
+Response:
+{
+  "data": {
+    "image_landmark": [
+      {
+        "key": 0,
+        "name": "SOL"
+      }
+    ]
+  }
+}
+
+Link Friends:
+mutation linkFriends {
+    link_friends(
+        friends_data: {
+                       friend1_key: "111",
+                       friend2_key: "222"})
+        {
+         friend1{
+                 key,
+         },
+         friend2{
+                 key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_friends": {
+      "friend1": {
+        "key": "111"
+      },
+      "friend2": {
+        "key": "222"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink Friends:
+mutation delinkFriends {
+    delink_friends(
+        friends_data: {
+                       friend1_key: "111",
+                       friend2_key: "222"})
+        {
+         friend1{
+                 key,
+         },
+         friend2{
+                 key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_friends": {
+      "friend1": {
+        "key": "111"
+      },
+      "friend2": {
+        "key": "222"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Friends:
+{
+    friends (key: "333"){
+        key,
+    }
+}
+
+Response:
+{
+  "data": {
+    "friends": [
+      {
+        "key": "555"
+      },
+      {
+        "key": "444"
+      }
+    ]
+  }
+}
+
+Link Following:
+mutation linkFollowing {
+    link_following(
+        following_data: {
+                         person_key: "111",
+                         follower_key: "333"})
+        {
+         person{
+                key,
+         },
+         follower{
+                  key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_following": {
+      "person": {
+        "key": "111"
+      },
+      "follower": {
+        "key": "333"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink Following:
+mutation delinkFollowing {
+    delink_following(
+        following_data: {
+                         person_key: "111",
+                         follower_key: "333"})
+        {
+         person{
+                key,
+         },
+         follower{
+                  key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_following": {
+      "person": {
+        "key": "111"
+      },
+      "follower": {
+        "key": "333"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Followers:
+{
+    followers (key: "222"){
+        key,
+        name
+    }
+}
+
+Response:
+{
+  "data": {
+    "followers": [
+      {
+        "key": "555",
+        "name": "Erin"
+      },
+      {
+        "key": "444",
+        "name": "Dan"
+      }
+    ]
+  }
+}
+
+Query Following:
+{
+    followings (key: "333"){
+        key,
+        name
+    }
+}
+
+Response:
+{
+  "data": {
+    "followings": [
+      {
+        "key": "111",
+        "name": "Alice"
+      }
+    ]
+  }
+}
+
+Link Person to Image:
+mutation linkPersonImage {
+    link_person_image(
+        person_image_data: {
+                            person_key: "111",
+                            image_key: "111aaa"})
+        {
+         person{
+                key,
+         },
+         image{
+               key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_person_image": {
+      "person": {
+        "key": "111"
+      },
+      "image": {
+        "key": "111aaa"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink Person from Image:
+mutation delinkPersonImage {
+    delink_person_image(
+        person_image_data: {
+                            person_key: "111",
+                            image_key: "111aaa"})
+        {
+         person{
+                key,
+         },
+         image{
+               key,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_person_image": {
+      "person": {
+        "key": "111"
+      },
+      "image": {
+        "key": "111aaa"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Person posted Images:
+{
+    person_posted_images (key: "111"){
+        key,
+        url,
+        description,
+        score,
+        private,
+        timestamp
+    }
+}
+
+Response:
+{
+  "data": {
+    "person_posted_images": [
+      {
+        "key": "111bbb",
+        "url": "https://image2",
+        "description": "SOL2",
+        "score": 96.8,
+        "private": true,
+        "timestamp": "2019-06-02T13:50:31+05:30"
+      },
+      {
+        "key": "111aaa",
+        "url": "https://image1",
+        "description": "SOL1",
+        "score": 80.4,
+        "private": false,
+        "timestamp": "2019-06-02T13:44:31+05:30"
+      }
+    ]
+  }
+}
+
+Query Image Poster:
+{
+    image_poster (key: "111aaa"){
+        key,
+        name,
+    }
+}
+
+Response:
+{
+  "data": {
+    "image_poster": [
+      {
+        "key": "111",
+        "name": "Alice"
+      }
+    ]
+  }
+}
+
+Link Person to Comment:
+mutation linkPersonComment {
+    link_person_comment(
+        person_comment_data: {
+                              person_key: "333",
+                              comment_key: 4})
+        {
+         person{
+                key,
+         },
+         comment{
+               text,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_person_comment": {
+      "person": {
+        "key": "333"
+      },
+      "comment": {
+        "text": "Comment text 1"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink Person from Comment:
+mutation delinkPersonComment {
+    delink_person_comment(
+        person_comment_data: {
+                              person_key: "333",
+                              comment_key: 4})
+        {
+         person{
+                key,
+         },
+         comment{
+               text,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_person_comment": {
+      "person": {
+        "key": "333"
+      },
+      "comment": {
+        "text": "Comment text 1"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query Person posted Comments:
+{
+    person_posted_comments (key: "444"){
+        key,
+        text,
+        timestamp
+    }
+}
+
+Response:
+{
+  "data": {
+    "person_posted_comments": [
+      {
+        "key": 52,
+        "text": "Comment text 3",
+        "timestamp": "2019-06-02T13:59:31+05:30"
+      },
+      {
+        "key": 51,
+        "text": "Comment text 2",
+        "timestamp": "2019-06-02T13:58:31+05:30"
+      }
+    ]
+  }
+}
+
+Query Comment Poster:
+{
+    comment_poster (key: 52){
+        key,
+        name,
+    }
+}
+
+Response:
+{
+  "data": {
+    "comment_poster": [
+      {
+        "key": "444",
+        "name": "Dan"
+      }
+    ]
+  }
+}
+
+Link Comment to Image:
+mutation linkImageComment {
+    link_image_comment(
+        image_comment_data: {
+                             image_key: "111aaa",
+                             comment_key: 4})
+        {
+         image{
+                key,
+         },
+         comment{
+               text,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "link_image_comment": {
+      "image": {
+        "key": "111aaa"
+      },
+      "comment": {
+        "text": "Comment text 1"
+      },
+      "ok": true
+    }
+  }
+}
+
+Delink Comment from Image:
+mutation delinkImageComment {
+    delink_image_comment(
+        image_comment_data: {
+                             image_key: "111aaa",
+                             comment_key: 4})
+        {
+         image{
+                key,
+         },
+         comment{
+               text,
+         },
+         ok
+    }
+}
+
+Response:
+{
+  "data": {
+    "delink_image_comment": {
+      "image": {
+        "key": "111aaa"
+      },
+      "comment": {
+        "text": "Comment text 1"
+      },
+      "ok": true
+    }
+  }
+}
+
+Query all Image Comments:
+{
+    image_comments (key: "111aaa"){
+        key,
+        text,
+    }
+}
+
+Response:
+{
+  "data": {
+    "image_comments": [
+      {
+        "key": 52,
+        "text": "Comment text 3"
+      },
+      {
+        "key": 4,
+        "text": "Comment text 1"
+      }
+    ]
+  }
+}
+
+Query Comment's Image:
+{
+    comment_image (key: 20){
+        key,
+    }
+}
+
+Response:
+{
+  "data": {
+    "comment_image": [
+      {
+        "key": "222bbb"
+      }
+    ]
+  }
+}
