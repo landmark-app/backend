@@ -10,7 +10,8 @@ from .persongo import Person
 from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
     PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
     FriendsInput, FollowingInput, PersonImageInput, CommentSchema,\
-    CommentInput, PersonCommentInput, ImageCommentInput
+    CommentQuerySchema, CommentInput, CommentDeleteInput,\
+    PersonCommentInput, ImageCommentInput
 
 # Environment variables
 url = os.environ['NEO4J_URL']
@@ -103,17 +104,20 @@ class CreateComment(graphene.Mutation):
         comment_data = CommentInput(required=True)
 
     comment = graphene.Field(CommentSchema)
+    key = graphene.Int()
     ok = graphene.Boolean()
 
     @staticmethod
     def mutate(self, info, comment_data=None):
-        comment = Comment(key=comment_data.key,
-                          text=comment_data.text,
+        comment = Comment(text=comment_data.text,
                           timestamp=comment_data.timestamp)
+
+        # To get the unique key, first need to store in DB
         comment.save(graph)
+        key = comment.__primaryvalue__
         ok = True
 
-        return CreateComment(comment=comment, ok=ok)
+        return CreateComment(comment=comment, key=key, ok=ok)
 
 
 # Relationship between landmark and its visitor
@@ -528,6 +532,11 @@ class DeleteLandMark(graphene.Mutation):
     @staticmethod
     def mutate(self, info, landmark_data=None):
         landmark = LandMark.match(graph, landmark_data.key).first()
+
+        if not landmark:
+            ok = False
+            return DeleteLandMark(landmark=None, ok=ok)
+
         landmark.delete(graph)
         ok = True
 
@@ -545,6 +554,11 @@ class DeletePerson(graphene.Mutation):
     @staticmethod
     def mutate(self, info, person_data=None):
         person = Person.match(graph, person_data.key).first()
+
+        if not person:
+            ok = False
+            return DeletePerson(person=None, ok=ok)
+
         person.delete(graph)
         ok = True
 
@@ -562,6 +576,11 @@ class DeleteImage(graphene.Mutation):
     @staticmethod
     def mutate(self, info, image_data=None):
         image = Image.match(graph, image_data.key).first()
+
+        if not image:
+            ok = False
+            return DeleteImage(image=None, ok=ok)
+
         image.delete(graph)
         ok = True
 
@@ -571,7 +590,7 @@ class DeleteImage(graphene.Mutation):
 class DeleteComment(graphene.Mutation):
 
     class Arguments:
-        comment_data = CommentInput(required=True)
+        comment_data = CommentDeleteInput(required=True)
 
     comment = graphene.Field(CommentSchema)
     ok = graphene.Boolean()
@@ -579,6 +598,11 @@ class DeleteComment(graphene.Mutation):
     @staticmethod
     def mutate(self, info, comment_data=None):
         comment = Comment.match(graph, comment_data.key).first()
+
+        if not comment:
+            ok = False
+            return DeleteComment(comment=None, ok=ok)
+
         comment.delete(graph)
         ok = True
 
@@ -589,7 +613,7 @@ class Query(graphene.ObjectType):
     landmark = graphene.Field(LandMarkSchema, key=graphene.String())
     person = graphene.Field(PersonSchema, key=graphene.String())
     image = graphene.Field(ImageSchema, key=graphene.String())
-    comment = graphene.Field(CommentSchema, key=graphene.String())
+    comment = graphene.Field(CommentQuerySchema, key=graphene.String())
 
     # Query to fetch all visitors to a particular landmark
     landmark_visitors = graphene.List(PersonSchema, key=graphene.String())
@@ -619,96 +643,164 @@ class Query(graphene.ObjectType):
     image_poster = graphene.List(PersonSchema, key=graphene.String())
 
     # Query to fetch all comments posted by a person
-    person_posted_comments = graphene.List(CommentSchema,
+    person_posted_comments = graphene.List(CommentQuerySchema,
                                            key=graphene.String())
 
     # Query to fetch poster of a particular comment
-    comment_poster = graphene.List(PersonSchema, key=graphene.String())
+    comment_poster = graphene.List(PersonSchema, key=graphene.Int())
 
     # Query to fetch comments posted on a particular image
-    image_comments = graphene.List(CommentSchema, key=graphene.String())
+    image_comments = graphene.List(CommentQuerySchema, key=graphene.String())
 
     # Query to fetch image associated with a particular comment
-    comment_image = graphene.List(ImageSchema, key=graphene.String())
+    comment_image = graphene.List(ImageSchema, key=graphene.Int())
 
     def resolve_landmark(self, info, key):
         landmark = LandMark.match(graph, key).first()
+
+        if not landmark:
+            return None
+
         return LandMarkSchema(**landmark.as_dict())
 
     def resolve_person(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return None
+
         return PersonSchema(**person.as_dict())
 
     def resolve_image(self, info, key):
         image = Image.match(graph, key).first()
+
+        if not image:
+            return None
+
         return ImageSchema(**image.as_dict())
 
     def resolve_comment(self, info, key):
         comment = Comment.match(graph, key).first()
-        return CommentSchema(**comment.as_dict())
+
+        if not comment:
+            return None
+
+        return CommentQuerySchema(**comment.as_dict())
 
     def resolve_landmark_visitors(self, info, key):
         landmark = LandMark.match(graph, key).first()
+
+        if not landmark:
+            return None
+
         return [PersonSchema(**person.as_dict())
                 for person in landmark.visitors]
 
     def resolve_person_visits(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return None
+
         return [LandMarkSchema(**landmark.as_dict())
                 for landmark in person.visited]
 
     def resolve_landmark_images(self, info, key):
         landmark = LandMark.match(graph, key).first()
+
+        if not landmark:
+            return None
+
         return [ImageSchema(**image.as_dict())
                 for image in landmark.images]
 
     def resolve_image_landmark(self, info, key):
         image = Image.match(graph, key).first()
+
+        if not image:
+            return None
+
         return [LandMarkSchema(**landmark.as_dict())
                 for landmark in image.landmark]
 
     def resolve_friends(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return person
+
         return [PersonSchema(**friend.as_dict())
                 for friend in person.friends]
 
     def resolve_followers(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return None
+
         return [PersonSchema(**follower.as_dict())
                 for follower in person.followers]
 
     def resolve_followings(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return None
+
         return [PersonSchema(**following.as_dict())
                 for following in person.followings]
 
     def resolve_person_posted_images(self, info, key):
         person = Person.match(graph, key).first()
+
+        if not person:
+            return None
+
         return [ImageSchema(**image.as_dict())
                 for image in person.posted_images]
 
     def resolve_image_poster(self, info, key):
         image = Image.match(graph, key).first()
+
+        if not image:
+            return None
+
         return [PersonSchema(**person.as_dict())
                 for person in image.poster]
 
     def resolve_person_posted_comments(self, info, key):
         person = Person.match(graph, key).first()
-        return [CommentSchema(**comment.as_dict())
+
+        if not person:
+            return None
+
+        return [CommentQuerySchema(**comment.as_dict())
                 for comment in person.posted_comments]
 
     def resolve_comment_poster(self, info, key):
         comment = Comment.match(graph, key).first()
+
+        if not comment:
+            return None
+
         return [PersonSchema(**person.as_dict())
                 for person in comment.poster]
 
     def resolve_image_comments(self, info, key):
         image = Image.match(graph, key).first()
-        return [CommentSchema(**comment.as_dict())
+
+        if not image:
+            return None
+
+        return [CommentQuerySchema(**comment.as_dict())
                 for comment in image.comments]
 
     def resolve_comment_image(self, info, key):
         comment = Comment.match(graph, key).first()
+
+        if not comment:
+            return None
+
         return [ImageSchema(**image.as_dict())
                 for image in comment.image]
 

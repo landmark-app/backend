@@ -81,15 +81,25 @@ class ImageInput(graphene.InputObjectType):
 
 
 class CommentSchema(graphene.ObjectType):
-    key = graphene.String()
+    # key = graphene.String()
+    text = graphene.String()
+    timestamp = CustomGrapheneDateTime()
+
+
+class CommentQuerySchema(graphene.ObjectType):
+    key = graphene.Int()
     text = graphene.String()
     timestamp = CustomGrapheneDateTime()
 
 
 class CommentInput(graphene.InputObjectType):
-    key = graphene.String(required=True)
+    # key = graphene.String(required=True)
     text = graphene.String()
     timestamp = CustomGrapheneDateTime()
+
+
+class CommentDeleteInput(graphene.InputObjectType):
+    key = graphene.Int()
 
 
 # LandMark Person relationship
@@ -125,10 +135,10 @@ class PersonImageInput(graphene.InputObjectType):
 # Person Comment relationship
 class PersonCommentInput(graphene.InputObjectType):
     person_key = graphene.String(required=True)
-    comment_key = graphene.String(required=True)
+    comment_key = graphene.Int(required=True)
 
 
 # Person Comment relationship
 class ImageCommentInput(graphene.InputObjectType):
     image_key = graphene.String(required=True)
-    comment_key = graphene.String(required=True)
+    comment_key = graphene.Int(required=True)
