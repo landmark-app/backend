@@ -7,8 +7,9 @@ from .commentgo import Comment
 from .imagego import Image
 from .landmarkgo import LandMark
 from .persongo import Person
-from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
-    PersonInput, VisitorInput, ImageSchema, ImageInput, LandMarkImageInput,\
+from .schemasdef import LandMarkSchema, LandMarkQuerySchema, LandMarkInput,\
+    LandMarkDeleteInput, PersonSchema, PersonInput, VisitorInput,\
+    ImageSchema, ImageInput, LandMarkImageInput,\
     FriendsInput, FollowingInput, PersonImageInput, CommentSchema,\
     CommentQuerySchema, CommentInput, CommentDeleteInput,\
     PersonCommentInput, ImageCommentInput
@@ -17,12 +18,6 @@ from .schemasdef import LandMarkSchema, LandMarkInput, PersonSchema,\
 url = os.environ['NEO4J_URL']
 username = os.environ['NEO4J_USERNAME']
 password = os.environ['NEO4J_PASSWORD']
-
-"""
-url = "bolt://localhost:11007"
-username = "neo4j"
-password = "landmark"
-"""
 
 # Global variables
 graph = Graph(url, auth=(username, password))
@@ -34,12 +29,12 @@ class CreateLandMark(graphene.Mutation):
         landmark_data = LandMarkInput(required=True)
 
     landmark = graphene.Field(LandMarkSchema)
+    key = graphene.Int()
     ok = graphene.Boolean()
 
     @staticmethod
     def mutate(self, info, landmark_data=None):
-        landmark = LandMark(key=landmark_data.key,
-                            name=landmark_data.name,
+        landmark = LandMark(name=landmark_data.name,
                             description=landmark_data.description,
                             latitude=landmark_data.latitude,
                             longitude=landmark_data.longitude,
@@ -47,10 +42,13 @@ class CreateLandMark(graphene.Mutation):
                             state=landmark_data.state,
                             country=landmark_data.country,
                             continent=landmark_data.continent)
+
+        # To get the unique key, first need to store in DB
         landmark.save(graph)
+        key = landmark.__primaryvalue__
         ok = True
 
-        return CreateLandMark(landmark=landmark, ok=ok)
+        return CreateLandMark(landmark=landmark, key=key, ok=ok)
 
 
 class CreatePerson(graphene.Mutation):
@@ -524,7 +522,7 @@ class DelinkImageComment(graphene.Mutation):
 class DeleteLandMark(graphene.Mutation):
 
     class Arguments:
-        landmark_data = LandMarkInput(required=True)
+        landmark_data = LandMarkDeleteInput(required=True)
 
     landmark = graphene.Field(LandMarkSchema)
     ok = graphene.Boolean()
@@ -610,22 +608,22 @@ class DeleteComment(graphene.Mutation):
 
 
 class Query(graphene.ObjectType):
-    landmark = graphene.Field(LandMarkSchema, key=graphene.String())
+    landmark = graphene.Field(LandMarkQuerySchema, key=graphene.Int())
     person = graphene.Field(PersonSchema, key=graphene.String())
     image = graphene.Field(ImageSchema, key=graphene.String())
-    comment = graphene.Field(CommentQuerySchema, key=graphene.String())
+    comment = graphene.Field(CommentQuerySchema, key=graphene.Int())
 
     # Query to fetch all visitors to a particular landmark
-    landmark_visitors = graphene.List(PersonSchema, key=graphene.String())
+    landmark_visitors = graphene.List(PersonSchema, key=graphene.Int())
 
     # Query to fetch all landmark visits of a person
-    person_visits = graphene.List(LandMarkSchema, key=graphene.String())
+    person_visits = graphene.List(LandMarkQuerySchema, key=graphene.String())
 
     # Query to fetch all images of a particular landmark
-    landmark_images = graphene.List(ImageSchema, key=graphene.String())
+    landmark_images = graphene.List(ImageSchema, key=graphene.Int())
 
     # Query to fetch landmark in a particular image
-    image_landmark = graphene.List(LandMarkSchema, key=graphene.String())
+    image_landmark = graphene.List(LandMarkQuerySchema, key=graphene.String())
 
     # Query to fetch all friends of a person
     friends = graphene.List(PersonSchema, key=graphene.String())
@@ -661,7 +659,7 @@ class Query(graphene.ObjectType):
         if not landmark:
             return None
 
-        return LandMarkSchema(**landmark.as_dict())
+        return LandMarkQuerySchema(**landmark.as_dict())
 
     def resolve_person(self, info, key):
         person = Person.match(graph, key).first()
@@ -702,7 +700,7 @@ class Query(graphene.ObjectType):
         if not person:
             return None
 
-        return [LandMarkSchema(**landmark.as_dict())
+        return [LandMarkQuerySchema(**landmark.as_dict())
                 for landmark in person.visited]
 
     def resolve_landmark_images(self, info, key):
@@ -720,7 +718,7 @@ class Query(graphene.ObjectType):
         if not image:
             return None
 
-        return [LandMarkSchema(**landmark.as_dict())
+        return [LandMarkQuerySchema(**landmark.as_dict())
                 for landmark in image.landmark]
 
     def resolve_friends(self, info, key):
