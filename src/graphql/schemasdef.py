@@ -15,7 +15,20 @@ class CustomGrapheneDateTime(graphene.DateTime):
 
 
 class LandMarkSchema(graphene.ObjectType):
-    key = graphene.String()
+    name = graphene.String()
+    description = graphene.String()
+
+    # Location information
+    latitude = graphene.Float()
+    longitude = graphene.Float()
+    city = graphene.String()
+    state = graphene.String()
+    country = graphene.String()
+    continent = graphene.String()
+
+
+class LandMarkQuerySchema(graphene.ObjectType):
+    key = graphene.Int()
     name = graphene.String()
     description = graphene.String()
 
@@ -29,7 +42,6 @@ class LandMarkSchema(graphene.ObjectType):
 
 
 class LandMarkInput(graphene.InputObjectType):
-    key = graphene.String(required=True)
     name = graphene.String()
     description = graphene.String()
 
@@ -40,6 +52,10 @@ class LandMarkInput(graphene.InputObjectType):
     state = graphene.String()
     country = graphene.String()
     continent = graphene.String()
+
+
+class LandMarkDeleteInput(graphene.InputObjectType):
+    key = graphene.Int(required=True)
 
 
 class PersonSchema(graphene.ObjectType):
@@ -81,7 +97,6 @@ class ImageInput(graphene.InputObjectType):
 
 
 class CommentSchema(graphene.ObjectType):
-    # key = graphene.String()
     text = graphene.String()
     timestamp = CustomGrapheneDateTime()
 
@@ -93,24 +108,23 @@ class CommentQuerySchema(graphene.ObjectType):
 
 
 class CommentInput(graphene.InputObjectType):
-    # key = graphene.String(required=True)
     text = graphene.String()
     timestamp = CustomGrapheneDateTime()
 
 
 class CommentDeleteInput(graphene.InputObjectType):
-    key = graphene.Int()
+    key = graphene.Int(required=True)
 
 
 # LandMark Person relationship
 class VisitorInput(graphene.InputObjectType):
-    landmark_key = graphene.String(required=True)
+    landmark_key = graphene.Int(required=True)
     visitor_key = graphene.String(required=True)
 
 
 # LandMark Image relationship
 class LandMarkImageInput(graphene.InputObjectType):
-    landmark_key = graphene.String(required=True)
+    landmark_key = graphene.Int(required=True)
     image_key = graphene.String(required=True)
 
 
@@ -138,7 +152,7 @@ class PersonCommentInput(graphene.InputObjectType):
     comment_key = graphene.Int(required=True)
 
 
-# Person Comment relationship
+# Image Comment relationship
 class ImageCommentInput(graphene.InputObjectType):
     image_key = graphene.String(required=True)
     comment_key = graphene.Int(required=True)

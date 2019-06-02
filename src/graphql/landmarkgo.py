@@ -3,9 +3,7 @@ from py2neo.ogm import RelatedFrom
 
 
 class LandMark(GraphObject):
-    __primarykey__ = "key"
 
-    key = Property()
     name = Property()
     description = Property()
 
@@ -33,7 +31,7 @@ class LandMark(GraphObject):
 
     def as_dict(self):
         return {
-            'key': self.key,
+            'key': self.__primaryvalue__,
             'name': self.name,
             'description': self.description,
             'latitude': self.latitude,
